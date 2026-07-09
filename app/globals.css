@@ -1,26 +1,53 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Palette drawn from the floral Pantone board */
+  --cream: #fdfcf7;
+  --ink: #33517a;
+
+  --bloom-blue: #6b93c9;
+  --bloom-blue-deep: #41669c;
+  --bloom-blue-pale: #e3edf9;
+
+  --bloom-magenta: #a62960;
+  --bloom-pink: #e178a5;
+  --bloom-pink-pale: #fbeaf2;
+
+  --bloom-poppy: #e2683a;
+  --bloom-gold: #edb84a;
+  --bloom-gold-pale: #fbf3dc;
+
+  --bloom-olive: #8f9c3f;
+  --bloom-leaf: #74884a;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --color-blue: var(--bloom-blue);
+  --color-blue-deep: var(--bloom-blue-deep);
+  --color-blue-pale: var(--bloom-blue-pale);
+  --color-magenta: var(--bloom-magenta);
+  --color-pink: var(--bloom-pink);
+  --color-pink-pale: var(--bloom-pink-pale);
+  --color-poppy: var(--bloom-poppy);
+  --color-gold: var(--bloom-gold);
+  --color-gold-pale: var(--bloom-gold-pale);
+  --color-olive: var(--bloom-olive);
+  --color-leaf: var(--bloom-leaf);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-cormorant), ui-serif, Georgia, serif;
+  --font-script: var(--font-great-vibes), cursive;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--bloom-gold-pale);
+  color: var(--bloom-magenta);
 }
