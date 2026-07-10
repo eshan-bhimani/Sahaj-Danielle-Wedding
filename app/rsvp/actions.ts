@@ -2,71 +2,133 @@
 
 import { getSupabase } from "@/lib/supabase";
 
-export type RsvpState = {
-  status: "idle" | "success" | "error";
-  message?: string;
+export type HouseholdMatch = {
+  householdId: string;
+  householdName: string;
+  matchedGuests: string[];
 };
 
-export async function submitRsvp(
-  _prev: RsvpState,
-  formData: FormData,
-): Promise<RsvpState> {
-  const guestName = String(formData.get("guest_name") ?? "").trim();
-  const attendingRaw = formData.get("attending");
-  const attending = attendingRaw === "yes";
-  const numGuests = Number(formData.get("num_guests") ?? 1);
-  const foodAllergies = String(formData.get("food_allergies") ?? "").trim();
-  const notes = String(formData.get("notes") ?? "").trim();
+export type GuestRsvp = {
+  id: string;
+  name: string;
+  welcomeParty: boolean | null;
+  mehndi: boolean | null;
+  weddingDay: boolean | null;
+};
 
-  if (!guestName) {
-    return { status: "error", message: "Please enter your name." };
-  }
-  if (guestName.length > 200) {
-    return { status: "error", message: "Name is too long." };
-  }
-  if (attendingRaw !== "yes" && attendingRaw !== "no") {
-    return {
-      status: "error",
-      message: "Please let us know whether you can make it.",
-    };
-  }
-  if (
-    attending &&
-    (!Number.isInteger(numGuests) || numGuests < 1 || numGuests > 10)
-  ) {
-    return {
-      status: "error",
-      message: "Number of guests must be between 1 and 10.",
-    };
-  }
-  if (foodAllergies.length > 1000) {
-    return { status: "error", message: "Food allergies text is too long." };
-  }
-  if (notes.length > 2000) {
-    return { status: "error", message: "Notes are too long." };
-  }
+export type Household = {
+  householdId: string;
+  name: string;
+  invited: { welcomeParty: boolean; mehndi: boolean; weddingDay: boolean };
+  responded: boolean;
+  foodAllergies: string | null;
+  notes: string | null;
+  guests: GuestRsvp[];
+};
 
-  const row = {
-    guest_name: guestName,
-    attending,
-    num_guests: attending ? numGuests : 1,
-    attending_welcome_party: attending && formData.get("event_welcome") === "on",
-    attending_mehndi: attending && formData.get("event_mehndi") === "on",
-    attending_wedding_day: attending && formData.get("event_wedding") === "on",
-    food_allergies: attending && foodAllergies ? foodAllergies : null,
-    notes: notes || null,
+export type SubmitResult = { ok: true } | { ok: false; error: string };
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function mapHousehold(data: any): Household {
+  return {
+    householdId: data.household_id,
+    name: data.name,
+    invited: {
+      welcomeParty: data.invited.welcome_party,
+      mehndi: data.invited.mehndi,
+      weddingDay: data.invited.wedding_day,
+    },
+    responded: data.responded,
+    foodAllergies: data.food_allergies ?? null,
+    notes: data.notes ?? null,
+    guests: (data.guests ?? []).map((g: any) => ({
+      id: g.id,
+      name: g.name,
+      welcomeParty: g.welcome_party ?? null,
+      mehndi: g.mehndi ?? null,
+      weddingDay: g.wedding_day ?? null,
+    })),
   };
+}
 
-  const { error } = await getSupabase().from("rsvps").insert(row);
+export async function searchHouseholds(
+  query: string,
+): Promise<HouseholdMatch[]> {
+  const q = query.trim();
+  if (q.length < 3 || q.length > 100) return [];
+
+  const { data, error } = await getSupabase().rpc("search_rsvp_households", {
+    p_query: q,
+  });
+  if (error || !data) {
+    if (error) console.error("RSVP search failed:", error.message);
+    return [];
+  }
+
+  const grouped = new Map<string, HouseholdMatch>();
+  for (const row of data as {
+    household_id: string;
+    household_name: string;
+    matched_guest: string;
+  }[]) {
+    const existing = grouped.get(row.household_id);
+    if (existing) {
+      existing.matchedGuests.push(row.matched_guest);
+    } else {
+      grouped.set(row.household_id, {
+        householdId: row.household_id,
+        householdName: row.household_name,
+        matchedGuests: [row.matched_guest],
+      });
+    }
+  }
+  return [...grouped.values()];
+}
+
+export async function loadHousehold(params: {
+  id?: string;
+  code?: string;
+}): Promise<Household | null> {
+  const { data, error } = await getSupabase().rpc("get_household_rsvp", {
+    p_id: params.id ?? null,
+    p_code: params.code ?? null,
+  });
+  if (error || !data?.found) {
+    if (error) console.error("RSVP load failed:", error.message);
+    return null;
+  }
+  return mapHousehold(data);
+}
+
+export async function submitHouseholdRsvp(input: {
+  householdId: string;
+  responses: {
+    guestId: string;
+    welcomeParty: boolean | null;
+    mehndi: boolean | null;
+    weddingDay: boolean | null;
+  }[];
+  foodAllergies: string;
+  notes: string;
+}): Promise<SubmitResult> {
+  const { data, error } = await getSupabase().rpc("submit_household_rsvp", {
+    p_household_id: input.householdId,
+    p_responses: input.responses.map((r) => ({
+      guest_id: r.guestId,
+      welcome_party: r.welcomeParty,
+      mehndi: r.mehndi,
+      wedding_day: r.weddingDay,
+    })),
+    p_food_allergies: input.foodAllergies.trim() || null,
+    p_notes: input.notes.trim() || null,
+  });
 
   if (error) {
-    console.error("RSVP insert failed:", error.message);
-    return {
-      status: "error",
-      message:
-        "Something went wrong saving your RSVP. Please try again in a moment.",
-    };
+    console.error("RSVP submit failed:", error.message);
+    return { ok: false, error: "server" };
   }
-
-  return { status: "success" };
+  if (!data?.ok) {
+    return { ok: false, error: data?.error ?? "server" };
+  }
+  return { ok: true };
 }

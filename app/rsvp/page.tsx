@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
-import RsvpForm from "@/components/RsvpForm";
+import RsvpFlow from "@/components/RsvpFlow";
 import { FloralCorner, FloralDivider } from "@/components/Floral";
+import { loadHousehold } from "./actions";
 
 export const metadata: Metadata = {
   title: "RSVP — Danielle & Sahaj",
 };
 
-export default function RsvpPage() {
+export default async function RsvpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string }>;
+}) {
+  const { code } = await searchParams;
+  const initialHousehold = code ? await loadHousehold({ code }) : null;
+
   return (
     <section className="relative overflow-hidden px-4 py-16 sm:py-20">
       <FloralCorner className="left-0 top-0 -translate-x-6 -translate-y-6" />
@@ -16,12 +24,15 @@ export default function RsvpPage() {
         </h1>
         <FloralDivider className="my-8" />
         <p className="mb-10 text-lg leading-relaxed">
-          Kindly respond by filling out the form below. We hope you can join
-          us for our celebration weekend, May 20&ndash;22, 2027 in Cumming,
-          GA.
+          We hope you can join us for our celebration weekend, May
+          20&ndash;22, 2027 in Cumming, GA. Find your invitation below to
+          respond for your party.
         </p>
       </div>
-      <RsvpForm />
+      <RsvpFlow
+        initialHousehold={initialHousehold}
+        codeNotFound={Boolean(code) && !initialHousehold}
+      />
     </section>
   );
 }
