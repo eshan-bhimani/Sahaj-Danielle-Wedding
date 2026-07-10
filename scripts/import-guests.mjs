@@ -78,7 +78,12 @@ for (const col of expected) {
 }
 const col = Object.fromEntries(expected.map((c) => [c, header.indexOf(c)]));
 
-const households = new Map();
+/* Consecutive rows with the same household value form one household.
+ * The same name reappearing later in the file starts a NEW household
+ * (several distinct families can share a display name like
+ * "Khanwani Family"). Keep each household's guests on adjacent rows. */
+const households = [];
+let current = null;
 for (const r of rows) {
   const hName = r[col.household]?.trim();
   const gName = r[col.guest]?.trim();
@@ -86,27 +91,27 @@ for (const r of rows) {
     console.error(`Skipping malformed row: ${JSON.stringify(r)}`);
     continue;
   }
-  if (!households.has(hName)) {
-    households.set(hName, {
+  if (!current || current.name !== hName) {
+    current = {
       name: hName,
       invited_welcome_party: yes(r[col.welcome_party]),
       invited_mehndi: yes(r[col.mehndi]),
       invited_wedding_day: yes(r[col.wedding_day]),
       guests: [],
-    });
+    };
+    households.push(current);
   }
-  const h = households.get(hName);
-  h.guests.push({
+  current.guests.push({
     full_name: gName,
     is_primary: yes(r[col.is_primary]),
-    sort_order: h.guests.length,
+    sort_order: current.guests.length,
   });
 }
 
-const totalGuests = [...households.values()].reduce((n, h) => n + h.guests.length, 0);
-console.log(`Parsed ${households.size} households / ${totalGuests} guests from ${csvPath}\n`);
+const totalGuests = households.reduce((n, h) => n + h.guests.length, 0);
+console.log(`Parsed ${households.length} households / ${totalGuests} guests from ${csvPath}\n`);
 
-for (const h of households.values()) {
+for (const h of households) {
   if (!h.guests.some((g) => g.is_primary)) {
     console.warn(`⚠ ${h.name}: no is_primary=yes guest — first guest will be treated as primary.`);
     h.guests[0].is_primary = true;
@@ -118,7 +123,7 @@ for (const h of households.values()) {
 }
 
 if (dryRun) {
-  for (const h of households.values()) {
+  for (const h of households) {
     const events = [
       h.invited_welcome_party && "Welcome Party",
       h.invited_mehndi && "Mehndi",
@@ -158,7 +163,7 @@ if (existingErr) { console.error("Failed to read existing codes:", existingErr.m
 const usedCodes = new Set((existing ?? []).map((r) => r.invite_code));
 
 const codeList = [];
-for (const h of households.values()) {
+for (const h of households) {
   let invite_code = makeCode();
   while (usedCodes.has(invite_code)) invite_code = makeCode();
   usedCodes.add(invite_code);

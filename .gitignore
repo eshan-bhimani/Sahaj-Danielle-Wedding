@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# real guest data (contains phones/addresses) — never commit
+scripts/people.csv
+scripts/guest-list.csv
+scripts/invite-codes.csv
+scripts/import.sql
