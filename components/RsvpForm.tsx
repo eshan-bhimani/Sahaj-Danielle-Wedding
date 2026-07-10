@@ -139,29 +139,26 @@ export default function RsvpForm() {
             </div>
           </fieldset>
 
-          {/* Meal preference */}
-          <fieldset>
-            <legend className="mb-3 font-serif text-xl tracking-[0.15em] text-blue-deep uppercase">
-              Meal Preference
-            </legend>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {["Chicken", "Lamb", "Vegetarian"].map((meal) => (
-                <label
-                  key={meal}
-                  className="flex cursor-pointer items-center justify-center rounded-lg border-2 border-blue/40 bg-white px-4 py-3 text-lg transition-colors hover:border-blue has-checked:border-poppy has-checked:bg-gold-pale/60 has-checked:text-poppy"
-                >
-                  <input
-                    type="radio"
-                    name="meal_preference"
-                    value={meal}
-                    required
-                    className="sr-only"
-                  />
-                  {meal}
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          {/* Food allergies */}
+          <div>
+            <label
+              htmlFor="food_allergies"
+              className="mb-2 block font-serif text-xl tracking-[0.15em] text-blue-deep uppercase"
+            >
+              Food Allergies
+            </label>
+            <input
+              id="food_allergies"
+              name="food_allergies"
+              type="text"
+              maxLength={1000}
+              placeholder="Let us know about any food allergies in your party"
+              className={inputClasses}
+            />
+            <p className="mt-1.5 text-sm text-ink/60">
+              Leave blank if none.
+            </p>
+          </div>
         </>
       )}
 
@@ -178,7 +175,7 @@ export default function RsvpForm() {
           name="notes"
           rows={4}
           maxLength={2000}
-          placeholder="Dietary restrictions, song requests, or a note for the couple"
+          placeholder="Song requests or a note for the couple"
           className={inputClasses}
         />
       </div>

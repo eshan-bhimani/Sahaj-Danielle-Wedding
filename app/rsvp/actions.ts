@@ -7,8 +7,6 @@ export type RsvpState = {
   message?: string;
 };
 
-const MEALS = ["Chicken", "Lamb", "Vegetarian"] as const;
-
 export async function submitRsvp(
   _prev: RsvpState,
   formData: FormData,
@@ -17,7 +15,7 @@ export async function submitRsvp(
   const attendingRaw = formData.get("attending");
   const attending = attendingRaw === "yes";
   const numGuests = Number(formData.get("num_guests") ?? 1);
-  const meal = String(formData.get("meal_preference") ?? "");
+  const foodAllergies = String(formData.get("food_allergies") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
 
   if (!guestName) {
@@ -41,8 +39,8 @@ export async function submitRsvp(
       message: "Number of guests must be between 1 and 10.",
     };
   }
-  if (attending && !MEALS.includes(meal as (typeof MEALS)[number])) {
-    return { status: "error", message: "Please choose a meal preference." };
+  if (foodAllergies.length > 1000) {
+    return { status: "error", message: "Food allergies text is too long." };
   }
   if (notes.length > 2000) {
     return { status: "error", message: "Notes are too long." };
@@ -55,7 +53,7 @@ export async function submitRsvp(
     attending_welcome_party: attending && formData.get("event_welcome") === "on",
     attending_mehndi: attending && formData.get("event_mehndi") === "on",
     attending_wedding_day: attending && formData.get("event_wedding") === "on",
-    meal_preference: attending ? meal : null,
+    food_allergies: attending && foodAllergies ? foodAllergies : null,
     notes: notes || null,
   };
 
