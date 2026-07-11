@@ -79,6 +79,18 @@ function ResponseSummary({ household }: { household: Household }) {
   );
 }
 
+function BackToSearchButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mb-4 inline-flex items-center gap-2 font-serif text-lg tracking-[0.1em] text-blue-deep transition-colors hover:text-magenta"
+    >
+      <span aria-hidden="true">&larr;</span> Back to search
+    </button>
+  );
+}
+
 /* ---------- Main flow ---------- */
 
 export default function RsvpFlow({
@@ -99,6 +111,7 @@ export default function RsvpFlow({
   const [code, setCode] = useState("");
   const [allergies, setAllergies] = useState("");
   const [notes, setNotes] = useState("");
+  const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(
     codeNotFound
       ? "We couldn't find an invitation for that code. Try searching by name below."
@@ -110,7 +123,16 @@ export default function RsvpFlow({
   function openHousehold(h: Household) {
     setHousehold(h);
     setAnswers(emptyAnswers(h));
-    setMatches(null);
+    setAllergies("");
+    setNotes("");
+    setEmail("");
+    setError(null);
+  }
+
+  /* Keeps the previous search results so guests land back on the list. */
+  function backToSearch() {
+    setHousehold(null);
+    setSubmitted(false);
     setError(null);
   }
 
@@ -198,11 +220,16 @@ export default function RsvpFlow({
         })),
         foodAllergies: allergies,
         notes,
+        email,
       });
       if (result.ok) {
         const fresh = await loadHousehold({ id: household.householdId });
         if (fresh) setHousehold(fresh);
         setSubmitted(true);
+      } else if (result.error === "email") {
+        setError(
+          "That email address doesn't look right — fix it or leave it blank.",
+        );
       } else if (result.error === "already_responded") {
         setError(
           "This invitation has already been responded to. Reach out to Danielle & Sahaj if anything needs to change.",
@@ -225,6 +252,12 @@ export default function RsvpFlow({
           Your RSVP for <span className="font-medium">{household.name}</span>{" "}
           has been received. We can&apos;t wait to celebrate with you!
         </p>
+        {email.trim() && (
+          <p className="mt-3 text-ink/70">
+            A confirmation email is on its way to{" "}
+            <span className="font-medium">{email.trim()}</span>.
+          </p>
+        )}
         <ResponseSummary household={household} />
         <p className="mt-8 text-ink/70">
           Responses can&apos;t be changed online after submitting — if plans
@@ -237,7 +270,9 @@ export default function RsvpFlow({
   /* ---------- Already responded ---------- */
   if (household && household.responded) {
     return (
-      <div className="mx-auto max-w-xl rounded-2xl bg-gold-pale/60 px-6 py-12 text-center">
+      <div className="mx-auto max-w-xl">
+        <BackToSearchButton onClick={backToSearch} />
+        <div className="rounded-2xl bg-gold-pale/60 px-6 py-12 text-center">
         <p className="font-script text-4xl text-poppy">
           You&apos;ve already RSVP&apos;d
         </p>
@@ -247,9 +282,11 @@ export default function RsvpFlow({
           <span className="font-medium">{household.name}</span>.
         </p>
         <ResponseSummary household={household} />
-        <p className="mt-8 text-ink/70">
-          If plans change, please reach out to Danielle &amp; Sahaj directly.
-        </p>
+          <p className="mt-8 text-ink/70">
+            If plans change, please reach out to Danielle &amp; Sahaj
+            directly.
+          </p>
+        </div>
       </div>
     );
   }
@@ -259,6 +296,7 @@ export default function RsvpFlow({
     const events = invitedEvents(household);
     return (
       <div className="mx-auto max-w-2xl">
+        <BackToSearchButton onClick={backToSearch} />
         <div className="rounded-2xl bg-blue-pale/60 px-6 py-8 text-center">
           <p className="font-script text-4xl text-magenta">Welcome,</p>
           <p className="mt-2 font-serif text-3xl tracking-[0.1em] text-blue-deep uppercase">
@@ -344,8 +382,25 @@ export default function RsvpFlow({
           ))}
         </div>
 
-        {/* Allergies + notes */}
+        {/* Email, allergies + notes */}
         <div className="mt-8 space-y-6">
+          <div>
+            <label htmlFor="confirmation_email" className={headingClasses}>
+              Email
+            </label>
+            <input
+              id="confirmation_email"
+              type="email"
+              maxLength={320}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className={inputClasses}
+            />
+            <p className="mt-1.5 text-sm text-ink/60">
+              Optional — we&apos;ll send your confirmation here.
+            </p>
+          </div>
           <div>
             <label htmlFor="food_allergies" className={headingClasses}>
               Food Allergies

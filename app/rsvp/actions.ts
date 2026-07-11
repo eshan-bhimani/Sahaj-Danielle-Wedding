@@ -1,6 +1,7 @@
 "use server";
 
 import { getSupabase } from "@/lib/supabase";
+import { sendGuestConfirmation } from "@/lib/notify";
 
 export type HouseholdMatch = {
   householdId: string;
@@ -110,7 +111,13 @@ export async function submitHouseholdRsvp(input: {
   }[];
   foodAllergies: string;
   notes: string;
+  email: string;
 }): Promise<SubmitResult> {
+  const email = input.email.trim();
+  if (email && (email.length > 320 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))) {
+    return { ok: false, error: "email" };
+  }
+
   const { data, error } = await getSupabase().rpc("submit_household_rsvp", {
     p_household_id: input.householdId,
     p_responses: input.responses.map((r) => ({
@@ -121,6 +128,7 @@ export async function submitHouseholdRsvp(input: {
     })),
     p_food_allergies: input.foodAllergies.trim() || null,
     p_notes: input.notes.trim() || null,
+    p_email: email || null,
   });
 
   if (error) {
@@ -130,5 +138,14 @@ export async function submitHouseholdRsvp(input: {
   if (!data?.ok) {
     return { ok: false, error: data?.error ?? "server" };
   }
+
+  // Confirmation email to the guest. Never blocks or fails the RSVP —
+  // sendGuestConfirmation no-ops when Gmail isn't configured and
+  // swallows send errors.
+  if (email) {
+    const saved = await loadHousehold({ id: input.householdId });
+    if (saved) await sendGuestConfirmation(saved, email);
+  }
+
   return { ok: true };
 }
