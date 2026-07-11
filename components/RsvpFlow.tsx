@@ -426,7 +426,7 @@ export default function RsvpFlow({
               maxLength={2000}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Song requests or a note for the couple"
+              placeholder="Note for the couple"
               className={inputClasses}
             />
           </div>
