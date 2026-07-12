@@ -16,8 +16,11 @@
   --bloom-poppy: #e2683a;
   --bloom-gold: #edb84a;
   --bloom-gold-pale: #fbf3dc;
+  --bloom-gold-deep: #a97b12;
 
   --bloom-olive: #8f9c3f;
+  --bloom-olive-pale: #f0f2dd;
+  --bloom-olive-deep: #6b7a2a;
   --bloom-leaf: #74884a;
 }
 
@@ -33,7 +36,10 @@
   --color-poppy: var(--bloom-poppy);
   --color-gold: var(--bloom-gold);
   --color-gold-pale: var(--bloom-gold-pale);
+  --color-gold-deep: var(--bloom-gold-deep);
   --color-olive: var(--bloom-olive);
+  --color-olive-pale: var(--bloom-olive-pale);
+  --color-olive-deep: var(--bloom-olive-deep);
   --color-leaf: var(--bloom-leaf);
 
   --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;

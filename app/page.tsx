@@ -104,10 +104,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ---------- Welcome Party ---------- */}
-      <section className="px-4 py-16 text-center sm:py-20">
+      {/* ---------- Welcome Party (yellow) ---------- */}
+      <section className="bg-gold-pale px-4 py-16 text-center sm:py-20">
         <div className="mx-auto max-w-2xl">
-          <h2 className="font-serif text-4xl tracking-[0.18em] text-magenta uppercase sm:text-5xl">
+          <h2 className="font-serif text-4xl tracking-[0.18em] text-gold-deep uppercase sm:text-5xl">
             Welcome Party
           </h2>
           <p className="mt-4 font-serif text-xl tracking-[0.15em] uppercase">
@@ -129,10 +129,10 @@ export default function Home() {
 
       <FloralDivider />
 
-      {/* ---------- Mehndi ---------- */}
-      <section className="mt-8 bg-pink-pale px-4 py-16 text-center sm:py-20">
+      {/* ---------- Mehndi (green) ---------- */}
+      <section className="mt-8 bg-olive-pale px-4 py-16 text-center sm:py-20">
         <div className="mx-auto max-w-2xl">
-          <h2 className="font-serif text-4xl tracking-[0.18em] text-poppy uppercase sm:text-5xl">
+          <h2 className="font-serif text-4xl tracking-[0.18em] text-olive-deep uppercase sm:text-5xl">
             Mehndi
           </h2>
           <p className="mt-4 font-serif text-xl tracking-[0.15em] uppercase">
@@ -151,10 +151,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ---------- Wedding Day ---------- */}
-      <section className="px-4 py-16 text-center sm:py-20">
+      {/* ---------- Wedding Day (pink) ---------- */}
+      <section className="bg-pink-pale px-4 py-16 text-center sm:py-20">
         <div className="mx-auto max-w-2xl">
-          <h2 className="font-serif text-4xl tracking-[0.18em] text-blue-deep uppercase sm:text-5xl">
+          <h2 className="font-serif text-4xl tracking-[0.18em] text-magenta uppercase sm:text-5xl">
             Wedding Day
           </h2>
           <p className="mt-4 font-serif text-xl tracking-[0.15em] uppercase">
@@ -179,8 +179,8 @@ export default function Home() {
               <li
                 key={item.name}
                 className={`grid grid-cols-1 gap-2 px-4 py-10 text-left sm:grid-cols-[220px_1fr] sm:gap-8 ${
-                  i % 2 === 1 ? "bg-gold-pale/50" : ""
-                } ${i > 0 ? "border-t border-blue-pale" : ""}`}
+                  i % 2 === 1 ? "bg-white/60" : ""
+                } ${i > 0 ? "border-t border-pink/30" : ""}`}
               >
                 <p className="font-serif text-xl tracking-[0.12em] text-magenta">
                   {item.time}

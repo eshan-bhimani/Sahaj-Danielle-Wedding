@@ -17,10 +17,19 @@ const answerClasses: Record<string, string> = {
   "— not invited": "text-ink/30",
 };
 
-function StatTile({ label, value }: { label: string; value: string }) {
+function StatTile({
+  label,
+  value,
+  className = "bg-blue-pale/60 text-blue-deep",
+}: {
+  label: string;
+  value: string;
+  className?: string;
+}) {
+  const [bg, text] = className.split(" ");
   return (
-    <div className="rounded-xl bg-blue-pale/60 px-4 py-4 text-center">
-      <p className="font-serif text-3xl text-blue-deep">{value}</p>
+    <div className={`rounded-xl px-4 py-4 text-center ${bg}`}>
+      <p className={`font-serif text-3xl ${text}`}>{value}</p>
       <p className="mt-1 text-sm tracking-wide text-ink/70 uppercase">
         {label}
       </p>
@@ -110,9 +119,21 @@ export default async function AdminPage({
             label="Households in"
             value={`${summary.households_responded}/${summary.households_total}`}
           />
-          <StatTile label="Welcome Party" value={`${summary.welcome_party_yes}`} />
-          <StatTile label="Mehndi" value={`${summary.mehndi_yes}`} />
-          <StatTile label="Wedding Day" value={`${summary.wedding_day_yes}`} />
+          <StatTile
+            label="Welcome Party"
+            value={`${summary.welcome_party_yes}`}
+            className="bg-gold-pale text-gold-deep"
+          />
+          <StatTile
+            label="Mehndi"
+            value={`${summary.mehndi_yes}`}
+            className="bg-olive-pale text-olive-deep"
+          />
+          <StatTile
+            label="Wedding Day"
+            value={`${summary.wedding_day_yes}`}
+            className="bg-pink-pale text-magenta"
+          />
         </div>
         <p className="mt-2 text-sm text-ink/60">
           Event tiles show confirmed &ldquo;yes&rdquo; guest counts. Updates

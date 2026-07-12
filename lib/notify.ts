@@ -15,10 +15,19 @@ import type { Household } from "@/app/rsvp/actions";
  * RSVP must never fail because a confirmation couldn't send.
  */
 
+/* Event colors match the site: yellow Welcome, green Mehndi, pink Wedding. */
 const EVENTS = [
-  { key: "welcomeParty", label: "Welcome Party — Thursday, May 20" },
-  { key: "mehndi", label: "Mehndi — Friday, May 21" },
-  { key: "weddingDay", label: "Wedding Day — Saturday, May 22" },
+  {
+    key: "welcomeParty",
+    label: "Welcome Party — Thursday, May 20",
+    color: "#a97b12",
+  },
+  { key: "mehndi", label: "Mehndi — Friday, May 21", color: "#6b7a2a" },
+  {
+    key: "weddingDay",
+    label: "Wedding Day — Saturday, May 22",
+    color: "#a62960",
+  },
 ] as const;
 
 export function confirmationText(household: Household): string {
@@ -58,9 +67,9 @@ export function confirmationHtml(household: Household): string {
     .map((guest) => {
       const rows = events
         .map(
-          ({ key, label }) => `
+          ({ key, label, color }) => `
         <tr>
-          <td style="padding:4px 16px 4px 0;color:#33517a">${label}</td>
+          <td style="padding:4px 16px 4px 0;color:${color}">${label}</td>
           <td style="padding:4px 0;${guest[key] ? "color:#4c7a34;font-weight:bold" : "color:#999"}">
             ${guest[key] ? "Attending" : "Not attending"}
           </td>

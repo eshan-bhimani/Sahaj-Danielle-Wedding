@@ -12,10 +12,27 @@ import { FloralDivider } from "./Floral";
 
 type EventKey = "welcomeParty" | "mehndi" | "weddingDay";
 
-const EVENTS: { key: EventKey; label: string; date: string }[] = [
-  { key: "welcomeParty", label: "Welcome Party", date: "Thursday, May 20" },
-  { key: "mehndi", label: "Mehndi", date: "Friday, May 21" },
-  { key: "weddingDay", label: "Wedding Day", date: "Saturday, May 22" },
+/* Each event carries the bride's color: yellow Welcome Party, green
+ * Mehndi, pink Wedding Day. */
+const EVENTS: { key: EventKey; label: string; date: string; accent: string }[] = [
+  {
+    key: "welcomeParty",
+    label: "Welcome Party",
+    date: "Thursday, May 20",
+    accent: "text-gold-deep",
+  },
+  {
+    key: "mehndi",
+    label: "Mehndi",
+    date: "Friday, May 21",
+    accent: "text-olive-deep",
+  },
+  {
+    key: "weddingDay",
+    label: "Wedding Day",
+    date: "Saturday, May 22",
+    accent: "text-magenta",
+  },
 ];
 
 type Answers = Record<string, Partial<Record<EventKey, boolean | null>>>;
@@ -54,9 +71,9 @@ function ResponseSummary({ household }: { household: Household }) {
         >
           <p className="font-serif text-xl text-blue-deep">{guest.name}</p>
           <ul className="mt-2 space-y-1">
-            {events.map(({ key, label }) => (
+            {events.map(({ key, label, accent }) => (
               <li key={key} className="flex justify-between text-lg">
-                <span>{label}</span>
+                <span className={`font-medium ${accent}`}>{label}</span>
                 <span
                   className={
                     guest[key] ? "text-olive font-medium" : "text-ink/60"
@@ -339,16 +356,18 @@ export default function RsvpFlow({
             >
               <p className="font-serif text-2xl text-blue-deep">{guest.name}</p>
               <div className="mt-3 space-y-3">
-                {events.map(({ key, label, date }) => {
+                {events.map(({ key, label, date, accent }) => {
                   const value = answers[guest.id]?.[key];
                   return (
                     <div
                       key={key}
                       className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
                     >
-                      <p className="text-lg">
+                      <p className={`text-lg font-medium ${accent}`}>
                         {label}
-                        <span className="ml-2 text-sm text-ink/60">{date}</span>
+                        <span className="ml-2 text-sm font-normal text-ink/60">
+                          {date}
+                        </span>
                       </p>
                       <div className="flex gap-2">
                         <button
