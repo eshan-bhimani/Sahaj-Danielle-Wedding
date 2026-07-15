@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { FloralCorner, FloralDivider, FloralDot } from "@/components/Floral";
+import { LightboxGallery, LightboxImage } from "@/components/Lightbox";
 
 export const metadata: Metadata = {
   title: "Dress Code — Danielle & Sahaj",
@@ -9,18 +10,13 @@ export const metadata: Metadata = {
 
 /* Drop real photos into public/dress-code/ as photo-1.jpg, photo-2.jpg,
  * photo-3.jpg and the placeholders below are replaced automatically. */
-function PhotoSlot({ file, alt }: { file: string; alt: string }) {
-  const exists = existsSync(join(process.cwd(), "public", "dress-code", file));
-  if (exists) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={`/dress-code/${file}`}
-        alt={alt}
-        className="h-full w-full rounded-xl object-cover"
-      />
-    );
-  }
+const inspirationPhotos = [
+  { file: "photo-1.jpg", alt: "Garden party attire inspiration" },
+  { file: "photo-2.jpg", alt: "Bright formal attire inspiration" },
+  { file: "photo-3.jpg", alt: "Guests in Pakistani formal attire" },
+];
+
+function Placeholder() {
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-blue/30 bg-blue-pale/40 p-6">
       <FloralDot />
@@ -70,6 +66,35 @@ const events = [
 ];
 
 export default function DressCodePage() {
+  const display = inspirationPhotos.map((photo) => ({
+    ...photo,
+    src: `/dress-code/${photo.file}`,
+    exists: existsSync(
+      join(process.cwd(), "public", "dress-code", photo.file),
+    ),
+  }));
+  const lightboxItems = display
+    .filter((p) => p.exists)
+    .map((p) => ({ src: p.src, caption: p.alt }));
+  const lightboxIndexOf = (file: string) =>
+    display.filter((p) => p.exists).findIndex((p) => p.file === file);
+
+  const slotClasses = "h-full w-full rounded-xl object-cover";
+
+  function Slot({ file }: { file: string }) {
+    const photo = display.find((p) => p.file === file)!;
+    return photo.exists ? (
+      <LightboxImage
+        index={lightboxIndexOf(file)}
+        src={photo.src}
+        alt={photo.alt}
+        className={slotClasses}
+      />
+    ) : (
+      <Placeholder />
+    );
+  }
+
   return (
     <section className="relative overflow-hidden px-4 py-16 sm:py-20">
       <FloralCorner className="left-0 top-0 -translate-x-6 -translate-y-6" />
@@ -101,22 +126,21 @@ export default function DressCodePage() {
         </div>
 
         {/* Inspiration photos */}
-        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <div className="aspect-[4/5]">
-            <PhotoSlot file="photo-1.jpg" alt="Garden party attire inspiration" />
+        <LightboxGallery items={lightboxItems}>
+          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="aspect-[4/5]">
+              <Slot file="photo-1.jpg" />
+            </div>
+            <div className="aspect-[4/5]">
+              <Slot file="photo-2.jpg" />
+            </div>
           </div>
-          <div className="aspect-[4/5]">
-            <PhotoSlot file="photo-2.jpg" alt="Bright formal attire inspiration" />
+          <div className="mx-auto mt-5 max-w-md">
+            <div className="aspect-[4/5]">
+              <Slot file="photo-3.jpg" />
+            </div>
           </div>
-        </div>
-        <div className="mx-auto mt-5 max-w-md">
-          <div className="aspect-[4/5]">
-            <PhotoSlot
-              file="photo-3.jpg"
-              alt="Guests in Pakistani formal attire"
-            />
-          </div>
-        </div>
+        </LightboxGallery>
 
         {/* Pakistani formal explainer */}
         <div className="mt-16 text-center">
