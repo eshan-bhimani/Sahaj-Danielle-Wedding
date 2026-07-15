@@ -23,10 +23,14 @@ export default async function RsvpPage({
           RSVP
         </h1>
         <FloralDivider className="my-8" />
-        <p className="mb-10 text-lg leading-relaxed">
+        <p className="text-lg leading-relaxed">
           We hope you can join us for our celebration weekend, May
           20&ndash;22, 2027 in Cumming, GA. Find your invitation below to
           respond for your party.
+        </p>
+        <p className="mb-10 mt-4 text-lg leading-relaxed text-ink/80">
+          If you&apos;re responding for you and a guest (or your family),
+          you&apos;ll be able to RSVP for your entire group.
         </p>
       </div>
       <RsvpFlow
