@@ -151,8 +151,10 @@ export default function Home() {
         </div>
       </section>
 
+      <FloralDivider />
+
       {/* ---------- Wedding Day (pink) ---------- */}
-      <section className="bg-pink-pale px-4 py-16 text-center sm:py-20">
+      <section className="mt-8 bg-pink-pale px-4 py-16 text-center sm:py-20">
         <div className="mx-auto max-w-2xl">
           <h2 className="font-serif text-4xl tracking-[0.18em] text-magenta uppercase sm:text-5xl">
             Wedding Day
@@ -179,14 +181,14 @@ export default function Home() {
               <li
                 key={item.name}
                 className={`grid grid-cols-1 gap-2 px-4 py-10 text-left sm:grid-cols-[220px_1fr] sm:gap-8 ${
-                  i % 2 === 1 ? "bg-white/60" : ""
-                } ${i > 0 ? "border-t border-pink/30" : ""}`}
+                  i > 0 ? "border-t border-pink/30" : ""
+                }`}
               >
-                <p className="font-serif text-xl tracking-[0.12em] text-magenta">
+                <p className="font-serif text-xl tracking-[0.12em] text-pink">
                   {item.time}
                 </p>
                 <div>
-                  <h3 className="font-serif text-2xl tracking-[0.18em] text-blue-deep uppercase">
+                  <h3 className="font-serif text-2xl tracking-[0.18em] text-magenta uppercase">
                     {item.name}
                   </h3>
                   {item.lines.map((line) => (
