@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import {
   loadHousehold,
@@ -8,6 +9,7 @@ import {
   type Household,
   type HouseholdMatch,
 } from "@/app/rsvp/actions";
+import AddToCalendar from "./AddToCalendar";
 import { FloralDivider } from "./Floral";
 
 type EventKey = "welcomeParty" | "mehndi" | "weddingDay";
@@ -43,6 +45,9 @@ const inputClasses =
 const headingClasses =
   "mb-2 block font-serif text-xl tracking-[0.15em] text-blue-deep uppercase";
 
+const homeButtonClasses =
+  "block w-full rounded-full bg-blue px-8 py-3 text-center font-serif text-lg tracking-[0.25em] text-white uppercase transition-colors hover:bg-blue-deep";
+
 function invitedEvents(household: Household) {
   return EVENTS.filter(({ key }) => household.invited[key]);
 }
@@ -58,28 +63,51 @@ function emptyAnswers(household: Household): Answers {
   return answers;
 }
 
-/* ---------- Read-only summary (already responded / just submitted) ---------- */
+/* Prefill from saved responses so "Update Response" starts from the
+ * household's current answers. */
+function savedAnswers(household: Household): Answers {
+  const answers: Answers = {};
+  for (const guest of household.guests) {
+    answers[guest.id] = {};
+    for (const { key } of invitedEvents(household)) {
+      answers[guest.id][key] = guest[key];
+    }
+  }
+  return answers;
+}
 
-function ResponseSummary({ household }: { household: Household }) {
-  const events = invitedEvents(household);
+/* ---------- Recap of a saved RSVP, grouped by event ---------- */
+
+function RsvpRecap({ household }: { household: Household }) {
   return (
-    <div className="mt-8 space-y-4 text-left">
-      {household.guests.map((guest) => (
-        <div
-          key={guest.id}
-          className="rounded-xl border border-blue/30 bg-white px-5 py-4"
-        >
-          <p className="font-serif text-xl text-blue-deep">{guest.name}</p>
-          <ul className="mt-2 space-y-1">
-            {events.map(({ key, label, accent }) => (
-              <li key={key} className="flex justify-between text-lg">
-                <span className={`font-medium ${accent}`}>{label}</span>
+    <div className="mt-8 space-y-8 text-left">
+      {invitedEvents(household).map(({ key, label, date, accent }) => (
+        <div key={key} className="border-t border-blue-pale pt-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className={`font-serif text-2xl ${accent}`}>
+              {label}
+              <span className="ml-2 text-sm font-normal text-ink/60">
+                {date}
+              </span>
+            </p>
+            <AddToCalendar eventKey={key} />
+          </div>
+          <ul className="mt-3 space-y-2">
+            {household.guests.map((guest) => (
+              <li key={guest.id} className="flex items-center gap-3 text-lg">
                 <span
-                  className={
-                    guest[key] ? "text-olive font-medium" : "text-ink/60"
-                  }
+                  aria-hidden="true"
+                  className={`flex h-6 w-6 items-center justify-center rounded-full text-sm text-white ${
+                    guest[key] ? "bg-olive" : "bg-ink/30"
+                  }`}
                 >
-                  {guest[key] ? "Attending" : "Not attending"}
+                  {guest[key] ? "✓" : "✕"}
+                </span>
+                <span>
+                  {guest.name}
+                  <span className="ml-2 text-sm text-ink/50">
+                    {guest[key] ? "attending" : "not attending"}
+                  </span>
                 </span>
               </li>
             ))}
@@ -87,7 +115,7 @@ function ResponseSummary({ household }: { household: Household }) {
         </div>
       ))}
       {household.foodAllergies && (
-        <p className="text-lg">
+        <p className="border-t border-blue-pale pt-5 text-lg">
           <span className="font-medium">Food allergies:</span>{" "}
           {household.foodAllergies}
         </p>
@@ -129,6 +157,7 @@ export default function RsvpFlow({
   const [allergies, setAllergies] = useState("");
   const [notes, setNotes] = useState("");
   const [email, setEmail] = useState("");
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(
     codeNotFound
       ? "We couldn't find an invitation for that code. Try searching by name below."
@@ -143,13 +172,26 @@ export default function RsvpFlow({
     setAllergies("");
     setNotes("");
     setEmail("");
+    setUpdating(false);
+    setSubmitted(false);
     setError(null);
   }
 
   /* Keeps the previous search results so guests land back on the list. */
   function backToSearch() {
     setHousehold(null);
+    setUpdating(false);
     setSubmitted(false);
+    setError(null);
+  }
+
+  function startUpdate() {
+    if (!household) return;
+    setAnswers(savedAnswers(household));
+    setAllergies(household.foodAllergies ?? "");
+    setNotes(household.notes ?? "");
+    setEmail(household.email ?? "");
+    setUpdating(true);
     setError(null);
   }
 
@@ -242,14 +284,11 @@ export default function RsvpFlow({
       if (result.ok) {
         const fresh = await loadHousehold({ id: household.householdId });
         if (fresh) setHousehold(fresh);
+        setUpdating(false);
         setSubmitted(true);
       } else if (result.error === "email") {
         setError(
           "That email address doesn't look right — fix it or leave it blank.",
-        );
-      } else if (result.error === "already_responded") {
-        setError(
-          "This invitation has already been responded to. Reach out to Danielle & Sahaj if anything needs to change.",
         );
       } else {
         setError(
@@ -275,54 +314,69 @@ export default function RsvpFlow({
             <span className="font-medium">{email.trim()}</span>.
           </p>
         )}
-        <ResponseSummary household={household} />
+        <RsvpRecap household={household} />
         <p className="mt-8 text-ink/70">
-          Responses can&apos;t be changed online after submitting — if plans
-          change, please reach out to Danielle &amp; Sahaj directly.
+          Plans change? You can come back and update your response anytime.
         </p>
-      </div>
-    );
-  }
-
-  /* ---------- Already responded ---------- */
-  if (household && household.responded) {
-    return (
-      <div className="mx-auto max-w-xl">
-        <BackToSearchButton onClick={backToSearch} />
-        <div className="rounded-2xl bg-gold-pale/60 px-6 py-12 text-center">
-        <p className="font-script text-4xl text-poppy">
-          You&apos;ve already RSVP&apos;d
-        </p>
-        <FloralDivider className="my-8" />
-        <p className="text-lg leading-relaxed">
-          We have a response on file for{" "}
-          <span className="font-medium">{household.name}</span>.
-        </p>
-        <ResponseSummary household={household} />
-          <p className="mt-8 text-ink/70">
-            If plans change, please reach out to Danielle &amp; Sahaj
-            directly.
-          </p>
+        <div className="mt-6">
+          <Link href="/" className={homeButtonClasses}>
+            Back to Homepage
+          </Link>
         </div>
       </div>
     );
   }
 
-  /* ---------- RSVP form ---------- */
+  /* ---------- Welcome back: recap + update ---------- */
+  if (household && household.responded && !updating) {
+    return (
+      <div className="mx-auto max-w-xl">
+        <BackToSearchButton onClick={backToSearch} />
+        <div className="rounded-2xl bg-gold-pale/60 px-6 py-12 text-center">
+          <p className="font-serif text-3xl leading-snug text-blue-deep">
+            Welcome back! Here&apos;s a quick recap of your RSVP.
+          </p>
+          <FloralDivider className="my-8" />
+          <div className="flex items-baseline justify-between">
+            <p className="text-lg font-medium">Your RSVP response</p>
+            <button
+              type="button"
+              onClick={startUpdate}
+              className="font-serif text-lg tracking-[0.1em] text-magenta underline underline-offset-4 transition-colors hover:text-pink"
+            >
+              Update Response
+            </button>
+          </div>
+          <RsvpRecap household={household} />
+          <div className="mt-10">
+            <Link href="/" className={homeButtonClasses}>
+              Back to Homepage
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ---------- RSVP form (first response or update) ---------- */
   if (household) {
     const events = invitedEvents(household);
     return (
       <div className="mx-auto max-w-2xl">
         <BackToSearchButton onClick={backToSearch} />
         <div className="rounded-2xl bg-blue-pale/60 px-6 py-8 text-center">
-          <p className="font-script text-4xl text-magenta">Welcome,</p>
+          <p className="font-script text-4xl text-magenta">
+            {updating ? "Updating your RSVP," : "Welcome,"}
+          </p>
           <p className="mt-2 font-serif text-3xl tracking-[0.1em] text-blue-deep uppercase">
             {household.name}
           </p>
           <p className="mt-4 text-lg">
-            You&apos;re invited to{" "}
-            {events.map((e) => e.label).join(events.length > 2 ? ", " : " and ")}
-            . Please respond for each person in your party.
+            {updating
+              ? "Your saved answers are filled in below — change whatever you need and resend."
+              : `You're invited to ${events
+                  .map((e) => e.label)
+                  .join(events.length > 2 ? ", " : " and ")}. Please respond for each person in your party.`}
           </p>
         </div>
 
@@ -461,8 +515,8 @@ export default function RsvpFlow({
         )}
 
         <p className="mt-6 text-center text-sm text-ink/60">
-          One response per household — answers can&apos;t be changed online
-          once sent, so double-check before submitting!
+          One response per household covers your whole party — and you can
+          come back to update it anytime.
         </p>
         <button
           type="button"
@@ -470,7 +524,7 @@ export default function RsvpFlow({
           disabled={pending}
           className="mt-4 w-full rounded-full bg-blue px-10 py-4 font-serif text-xl tracking-[0.3em] text-white uppercase shadow-md transition-colors hover:bg-blue-deep disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {pending ? "Sending…" : "Send RSVP"}
+          {pending ? "Sending…" : updating ? "Update RSVP" : "Send RSVP"}
         </button>
       </div>
     );
@@ -493,7 +547,7 @@ export default function RsvpFlow({
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder="e.g. Priya Kapoor"
+            placeholder="Full Name"
             className={inputClasses}
           />
           <button

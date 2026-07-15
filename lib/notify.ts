@@ -49,8 +49,7 @@ export function confirmationText(household: Household): string {
     lines.push(`Food allergies: ${household.foodAllergies}`, "");
   }
   lines.push(
-    "Responses can't be changed online — if plans change, please reach",
-    "out to Danielle & Sahaj directly.",
+    "Plans change? You can update your RSVP anytime on our website.",
     "",
     "We can't wait to celebrate with you!",
     "Danielle & Sahaj · May 20–22, 2027 · Cumming, GA",
@@ -93,8 +92,7 @@ export function confirmationHtml(household: Household): string {
     ${household.foodAllergies ? `<p style="margin-top:18px"><b>Food allergies:</b> ${esc(household.foodAllergies)}</p>` : ""}
     <hr style="border:none;border-top:1px solid #e3edf9;margin:20px 0" />
     <p style="color:#777;font-size:14px">
-      Responses can&rsquo;t be changed online &mdash; if plans change, please
-      reach out to Danielle &amp; Sahaj directly.
+      Plans change? You can update your RSVP anytime on our website.
     </p>
     <p style="text-align:center;color:#a62960;font-size:16px;margin-top:24px">
       We can&rsquo;t wait to celebrate with you!<br/>

@@ -24,6 +24,7 @@ export type Household = {
   responded: boolean;
   foodAllergies: string | null;
   notes: string | null;
+  email: string | null;
   guests: GuestRsvp[];
 };
 
@@ -42,6 +43,7 @@ function mapHousehold(data: any): Household {
     responded: data.responded,
     foodAllergies: data.food_allergies ?? null,
     notes: data.notes ?? null,
+    email: data.email ?? null,
     guests: (data.guests ?? []).map((g: any) => ({
       id: g.id,
       name: g.name,
