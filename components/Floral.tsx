@@ -106,6 +106,33 @@ export function FloralCorner({ className = "" }: { className?: string }) {
   );
 }
 
+/** A dainty vine that underlines the active nav link. */
+export function FloralUnderline({
+  className = "h-3 w-24",
+}: {
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 120 14"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+      role="presentation"
+    >
+      <path
+        d="M4 7 C 30 3, 90 11, 116 7"
+        stroke="var(--bloom-leaf)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path d="M34 6 q -5 -6 -12 -6 q 3 7 12 6 Z" fill="var(--bloom-olive)" />
+      <Blossom cx={60} cy={7} r={5} color="var(--bloom-pink)" center="var(--bloom-gold)" />
+      <circle cx={88} cy={8} r={2.5} fill="var(--bloom-poppy)" />
+    </svg>
+  );
+}
+
 /** Small single bloom, used as a bullet/icon. */
 export function FloralDot({ className = "" }: { className?: string }) {
   return (
