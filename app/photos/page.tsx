@@ -47,7 +47,7 @@ export default function PhotosPage() {
           From high school sweethearts to forever
         </p>
         <p className="mt-5 text-lg leading-relaxed">
-          Memories from our journey of 10+ years and counting{" "}
+          Memories from our journey together{" "}
           <span aria-hidden="true" className="text-magenta">
             ♥
           </span>

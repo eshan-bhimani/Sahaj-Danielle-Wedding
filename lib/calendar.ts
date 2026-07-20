@@ -17,7 +17,7 @@ export const WEDDING_EVENTS: Record<WeddingEvent["key"], WeddingEvent> = {
     title: "Danielle & Sahaj — Welcome Party",
     startUtc: "20270520T210000Z", // Thu May 20, 2027 5:00 PM EDT
     endUtc: "20270521T010000Z", //                   9:00 PM EDT
-    location: "Cumming, GA, United States",
+    location: "2361 Academy Ct NE, Atlanta, GA 30345",
     description:
       "Welcome party at Sahaj's childhood home. Attire: Smart - Casual (Western or Pakistani).",
   },
@@ -26,7 +26,8 @@ export const WEDDING_EVENTS: Record<WeddingEvent["key"], WeddingEvent> = {
     title: "Danielle & Sahaj — Mehndi",
     startUtc: "20270521T220000Z", // Fri May 21, 2027 6:00 PM EDT
     endUtc: "20270522T020000Z", //                   10:00 PM EDT
-    location: "Cumming, GA, United States",
+    location:
+      "Shiloh Gardens Special Events Venue, 5235 Union Hill Road, Cumming, GA, 30040, United States",
     description:
       "Bridal Henna Ceremony. Attire: Western or Pakistani Formal Attire.",
   },

@@ -14,12 +14,12 @@ const faqs = [
   {
     question: "Can I bring people who were not invited?",
     answer:
-      "While we wish that we could have everyone, our venue can only support a small number of people. We ask that you only RSVP for anyone who is able to come and not bring anyone else. We have had to be very selective about who we are able to invite and are very excited to have you there!",
+      "While we wish that we could have everyone, our venue can only support a small number of people. We ask that you only RSVP for anyone who is able to come and not bring anyone else.",
   },
   {
     question: "When is the RSVP deadline?",
     answer:
-      "We ask that you RSVP as soon as possible in order for us to get accurate headcounts. However, the official deadline to RSVP is April 1st.",
+      "For International Guests, we ask that you RSVP by December 31st, 2026. We ask that you RSVP as soon as possible in order for us to get accurate headcounts. However, the official deadline to RSVP is April 1st.",
   },
 ];
 

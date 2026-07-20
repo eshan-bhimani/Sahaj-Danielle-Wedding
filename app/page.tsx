@@ -2,32 +2,16 @@ import Link from "next/link";
 import Countdown from "@/components/Countdown";
 import { FloralCorner, FloralDivider } from "@/components/Floral";
 
-const timeline = [
+/* Attire and address live once on the main Wedding Day card above. */
+const timeline: { time: string; name: string; detail?: string }[] = [
   {
     time: "3:30 PM–4:00 PM",
     name: "Baraat",
-    lines: ["Attire: Pakistani or Western Formal attire."],
     detail: "Join us in celebrating the groom as he makes his way to the altar!",
   },
-  {
-    time: "4:00 PM–6:00 PM",
-    name: "Wedding Ceremony",
-    lines: [
-      "Shiloh Gardens Special Events Venue",
-      "5235 Union Hill Road, Cumming, GA, 30040, United States",
-      "Attire: Pakistani or Western Formal Attire",
-    ],
-  },
-  {
-    time: "6:00 PM–7:00 PM",
-    name: "Cocktail Hour",
-    lines: ["Attire: Pakistani or Western Formal"],
-  },
-  {
-    time: "7:00 PM–10:30 PM",
-    name: "Reception",
-    lines: ["Attire: Pakistani or Western Formal"],
-  },
+  { time: "4:00 PM–6:00 PM", name: "Wedding Ceremony" },
+  { time: "6:00 PM–7:00 PM", name: "Cocktail Hour" },
+  { time: "7:00 PM–10:30 PM", name: "Reception" },
 ];
 
 export default function Home() {
@@ -94,14 +78,6 @@ export default function Home() {
             GA
           </p>
         </div>
-        <div className="mt-10 text-center">
-          <Link
-            href="/rsvp"
-            className="inline-block rounded-full bg-magenta px-10 py-3 font-serif text-lg tracking-[0.3em] text-white uppercase shadow-md transition-colors hover:bg-pink"
-          >
-            RSVP
-          </Link>
-        </div>
       </section>
 
       {/* ---------- Welcome Party (yellow) ---------- */}
@@ -116,7 +92,10 @@ export default function Home() {
           <p className="mt-2 font-serif text-lg tracking-[0.15em]">
             5:00 PM&ndash;9:00 PM
           </p>
-          <p className="mt-6 text-lg italic text-leaf">
+          <p className="mt-3 text-lg">
+            Location: 2361 Academy Ct NE Atlanta, GA 30345
+          </p>
+          <p className="mt-4 text-lg italic text-leaf">
             Attire: Smart - Casual (Western or Pakistani)
           </p>
           <p className="mt-6 text-lg leading-relaxed">
@@ -141,7 +120,8 @@ export default function Home() {
           <p className="mt-2 font-serif text-lg tracking-[0.15em]">
             6:00 PM&ndash;10:00 PM
           </p>
-          <p className="mt-6 text-lg italic text-leaf">
+          <p className="mt-3 text-lg">Location: Shiloh Gardens</p>
+          <p className="mt-4 text-lg italic text-leaf">
             Attire: Western or Pakistani Formal Attire
           </p>
           <p className="mt-6 text-lg leading-relaxed">
@@ -165,7 +145,11 @@ export default function Home() {
           <p className="mt-2 font-serif text-lg tracking-[0.15em]">
             3:30 PM&ndash;10:30 PM
           </p>
-          <p className="mt-6 text-lg italic text-leaf">
+          <p className="mt-3 text-lg">Location: Shiloh Gardens</p>
+          <p className="mt-1 text-lg text-ink/80">
+            5235 Union Hill Road, Cumming, GA, 30040, United States
+          </p>
+          <p className="mt-4 text-lg italic text-leaf">
             Attire: Western or Pakistani Formal
           </p>
           <p className="mt-6 text-lg leading-relaxed">
@@ -191,11 +175,6 @@ export default function Home() {
                   <h3 className="font-serif text-2xl tracking-[0.18em] text-magenta uppercase">
                     {item.name}
                   </h3>
-                  {item.lines.map((line) => (
-                    <p key={line} className="mt-2 text-lg leading-relaxed">
-                      {line}
-                    </p>
-                  ))}
                   {item.detail && (
                     <p className="mt-4 text-lg leading-relaxed">{item.detail}</p>
                   )}
