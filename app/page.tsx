@@ -19,14 +19,6 @@ export default function Home() {
     <>
       {/* ---------- Hero ---------- */}
       <section className="relative overflow-hidden px-4 pb-16 pt-14 text-center sm:pb-24 sm:pt-20">
-        {/* Faint proposal photo behind the hero text.
-            Drop the photo in at public/proposal.jpg — if the file is
-            missing the gradient below still carries the section. */}
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-15"
-          style={{ backgroundImage: "url('/proposal.jpg')" }}
-          aria-hidden="true"
-        />
         <div
           className="absolute inset-0 bg-gradient-to-b from-cream/40 via-transparent to-cream"
           aria-hidden="true"
