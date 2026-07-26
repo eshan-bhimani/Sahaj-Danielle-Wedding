@@ -109,33 +109,44 @@ check("limited-invite household loads", beta?.found === true && !beta.invited.we
 console.log("\nC. Submission validation & abuse cases");
 const [a1, a2] = alpha.guests;
 const b1 = beta.guests[0];
-const submit = (household_id, responses, extra = {}) =>
+const submit = (code, responses, extra = {}) =>
   sb.rpc("submit_household_rsvp", {
-    p_household_id: household_id,
+    p_code: code,
     p_responses: responses,
     p_food_allergies: extra.allergies ?? null,
     p_notes: extra.notes ?? null,
     p_email: extra.email ?? null,
   });
 {
-  const { data } = await submit("00000000-0000-0000-0000-000000000000", [
+  const { data } = await submit("ZZZZ99", [
     { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
   ]);
-  check("unknown household rejected", data?.error === "not_found");
+  check("unknown code rejected", data?.error === "code");
 }
 {
-  const { data } = await submit(alpha.household_id, []);
+  /* Knowing a household_id (e.g. leaked via name search) must not be
+   * enough to submit — only the invite code opens a household now. */
+  const { data } = await sb.rpc("submit_household_rsvp", {
+    p_code: alpha.household_id,
+    p_responses: [
+      { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
+    ],
+  });
+  check("household_id alone is rejected (code required)", data?.error === "code");
+}
+{
+  const { data } = await submit("TESTA1", []);
   check("empty responses rejected", data?.error === "invalid");
 }
 {
-  const { data } = await submit(alpha.household_id, [
+  const { data } = await submit("TESTA1", [
     { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
   ]);
   check("incomplete household rejected", data?.error === "incomplete");
 }
 {
   const { data } = await submit(
-    alpha.household_id,
+    "TESTA1",
     [
       { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
       { guest_id: a2.id, welcome_party: true, mehndi: true, wedding_day: true },
@@ -146,7 +157,7 @@ const submit = (household_id, responses, extra = {}) =>
 }
 {
   const { data } = await submit(
-    alpha.household_id,
+    "TESTA1",
     [
       { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
       { guest_id: a2.id, welcome_party: true, mehndi: true, wedding_day: true },
@@ -157,7 +168,7 @@ const submit = (household_id, responses, extra = {}) =>
 }
 {
   /* Alpha submit smuggling Beta's guest id — must not touch Beta */
-  const { data } = await submit(alpha.household_id, [
+  const { data } = await submit("TESTA1", [
     { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
     { guest_id: a2.id, welcome_party: false, mehndi: true, wedding_day: false },
     { guest_id: b1.id, welcome_party: true, mehndi: true, wedding_day: true },
@@ -170,7 +181,7 @@ const submit = (household_id, responses, extra = {}) =>
   );
 }
 {
-  const { data: after } = await sb.rpc("get_household_rsvp", { p_id: alpha.household_id });
+  const { data: after } = await sb.rpc("get_household_rsvp", { p_code: "TESTA1" });
   const g1 = after.guests.find((g) => g.name === "ZZAlpha One");
   const g2 = after.guests.find((g) => g.name === "ZZAlpha Two");
   check(
@@ -182,15 +193,21 @@ const submit = (household_id, responses, extra = {}) =>
   check("household marked responded", after.responded === true);
 }
 {
-  const { data } = await submit(alpha.household_id, [
+  /* Reversal (July 16, 2026): resubmission overwrites, it doesn't lock. */
+  const { data } = await submit("TESTA1", [
     { guest_id: a1.id, welcome_party: false, mehndi: false, wedding_day: false },
     { guest_id: a2.id, welcome_party: false, mehndi: false, wedding_day: false },
   ]);
-  check("locked after first submission", data?.error === "already_responded");
+  check("resubmission overwrites instead of locking", data?.ok === true);
+  const { data: after } = await sb.rpc("get_household_rsvp", { p_code: "TESTA1" });
+  check(
+    "overwritten answers reflect the second submission",
+    after.guests.every((g) => g.welcome_party === false),
+  );
 }
 {
   /* Beta invited to Mehndi + Wedding only — welcome answer must be discarded */
-  const { data } = await submit(beta.household_id, [
+  const { data } = await submit("TESTB1", [
     { guest_id: b1.id, welcome_party: true, mehndi: true, wedding_day: false },
   ]);
   check("limited-invite submit succeeds", data?.ok === true);

@@ -13,7 +13,7 @@ export default async function RsvpPage({
   searchParams: Promise<{ code?: string }>;
 }) {
   const { code } = await searchParams;
-  const initialHousehold = code ? await loadHousehold({ code }) : null;
+  const initialHousehold = code ? await loadHousehold(code) : null;
 
   return (
     <section className="relative overflow-hidden px-4 py-16 sm:py-20">
@@ -35,6 +35,7 @@ export default async function RsvpPage({
       </div>
       <RsvpFlow
         initialHousehold={initialHousehold}
+        initialCode={code}
         codeNotFound={Boolean(code) && !initialHousehold}
       />
     </section>

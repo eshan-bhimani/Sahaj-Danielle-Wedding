@@ -88,13 +88,13 @@ export async function searchHouseholds(
   return [...grouped.values()];
 }
 
-export async function loadHousehold(params: {
-  id?: string;
-  code?: string;
-}): Promise<Household | null> {
+/* The invite code is the only key that can open or write a household's
+ * RSVP — there is no id-based lookup. A household_id leaked via name
+ * search (or anything else) is not, by itself, enough to view or submit
+ * on someone else's behalf. */
+export async function loadHousehold(code: string): Promise<Household | null> {
   const { data, error } = await getSupabase().rpc("get_household_rsvp", {
-    p_id: params.id ?? null,
-    p_code: params.code ?? null,
+    p_code: code,
   });
   if (error || !data?.found) {
     if (error) console.error("RSVP load failed:", error.message);
@@ -104,7 +104,7 @@ export async function loadHousehold(params: {
 }
 
 export async function submitHouseholdRsvp(input: {
-  householdId: string;
+  code: string;
   responses: {
     guestId: string;
     welcomeParty: boolean | null;
@@ -121,7 +121,7 @@ export async function submitHouseholdRsvp(input: {
   }
 
   const { data, error } = await getSupabase().rpc("submit_household_rsvp", {
-    p_household_id: input.householdId,
+    p_code: input.code,
     p_responses: input.responses.map((r) => ({
       guest_id: r.guestId,
       welcome_party: r.welcomeParty,
@@ -145,7 +145,7 @@ export async function submitHouseholdRsvp(input: {
   // sendGuestConfirmation no-ops when Gmail isn't configured and
   // swallows send errors.
   if (email) {
-    const saved = await loadHousehold({ id: input.householdId });
+    const saved = await loadHousehold(input.code);
     if (saved) await sendGuestConfirmation(saved, email);
   }
 
