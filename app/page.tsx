@@ -121,6 +121,9 @@ export default function Home() {
             6:00 PM&ndash;10:00 PM
           </p>
           <p className="mt-3 text-lg">Location: Shiloh Gardens</p>
+          <p className="mt-1 text-lg text-ink/80">
+            5235 Union Hill Road, Cumming, GA, 30040, United States
+          </p>
           <p className="mt-4 text-lg italic text-leaf">
             Attire: Western or Pakistani Formal Attire
           </p>
@@ -140,7 +143,7 @@ export default function Home() {
             Wedding Day
           </h2>
           <p className="mt-4 font-serif text-xl tracking-[0.15em] uppercase">
-            May 22, 2027
+            Saturday, May 22, 2027
           </p>
           <p className="mt-2 font-serif text-lg tracking-[0.15em]">
             3:30 PM&ndash;10:30 PM
