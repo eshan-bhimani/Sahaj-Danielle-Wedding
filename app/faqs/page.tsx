@@ -19,7 +19,7 @@ const faqs = [
   {
     question: "When is the RSVP deadline?",
     answer:
-      "For International Guests, we ask that you RSVP by December 31st, 2026. We ask that you RSVP as soon as possible in order for us to get accurate headcounts. However, the official deadline to RSVP is April 1st.",
+      "For International guests, we ask that you RSVP by December 31st, 2026. For other guests, we ask that you RSVP as soon as possible in order for us to get accurate headcounts. However, the official deadline to RSVP is April 1st.",
   },
 ];
 
