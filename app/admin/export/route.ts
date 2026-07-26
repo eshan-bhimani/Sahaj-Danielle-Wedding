@@ -15,7 +15,7 @@ export async function GET() {
   }
 
   const header =
-    "household,guest,welcome_party,mehndi,wedding_day,food_allergies,notes,email,responded_at,invite_code";
+    "household,guest,welcome_party,mehndi,wedding_day,food_allergies,notes,email,phone,responded_at,invite_code";
   const lines = report.rows.map((r) =>
     [
       csvField(r.household),
@@ -26,6 +26,7 @@ export async function GET() {
       csvField(r.food_allergies),
       csvField(r.notes),
       csvField(r.email),
+      csvField(r.phone),
       csvField(r.responded_at),
       csvField(r.invite_code),
     ].join(","),

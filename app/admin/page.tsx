@@ -152,6 +152,7 @@ export default async function AdminPage({
                 <th className="px-4 py-3">Allergies</th>
                 <th className="px-4 py-3">Note</th>
                 <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Phone</th>
                 <th className="px-4 py-3">Code</th>
               </tr>
             </thead>
@@ -191,6 +192,9 @@ export default async function AdminPage({
                     </td>
                     <td className="px-4 py-2.5">
                       {firstOfHousehold ? (row.email ?? "") : ""}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {firstOfHousehold ? (row.phone ?? "") : ""}
                     </td>
                     <td className="px-4 py-2.5 font-mono text-xs">
                       {firstOfHousehold ? row.invite_code : ""}

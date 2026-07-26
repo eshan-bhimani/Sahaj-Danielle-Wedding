@@ -40,6 +40,7 @@ export type ReportRow = {
   responded_at: string | null;
   invite_code: string;
   email: string | null;
+  phone: string | null;
 };
 
 export type ReportSummary = {
