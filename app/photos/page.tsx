@@ -52,38 +52,43 @@ export default function PhotosPage() {
             ♥
           </span>
         </p>
+      </div>
 
-        {/* Gallery */}
-        <LightboxGallery items={lightboxItems}>
-          <div className="mt-14 space-y-16">
-            {display.map(({ file, caption, src, exists }) => {
-              if (exists) lightboxIndex++;
-              return (
-                <figure key={file}>
-                  {exists ? (
-                    <LightboxImage
-                      index={lightboxIndex}
-                      src={src}
-                      alt={caption}
-                      className="w-full rounded-2xl shadow-md"
-                    />
-                  ) : (
-                    <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-blue/30 bg-blue-pale/40">
-                      <FloralDot />
-                      <p className="font-script text-3xl text-blue-deep">
-                        Photo coming soon
-                      </p>
-                    </div>
-                  )}
-                  <figcaption className="mx-auto mt-4 max-w-lg text-lg italic leading-relaxed text-ink/80">
+      {/* Gallery — its own (wider) container so photos aren't capped by the
+          max-w-2xl text column above. */}
+      <LightboxGallery items={lightboxItems}>
+        <div className="relative mx-auto mt-14 grid max-w-5xl grid-cols-3 gap-4 sm:gap-8">
+          {display.map(({ file, caption, src, exists }) => {
+            if (exists) lightboxIndex++;
+            return (
+              <figure key={file}>
+                {exists ? (
+                  <LightboxImage
+                    index={lightboxIndex}
+                    src={src}
+                    alt={caption || "Photo of Danielle & Sahaj"}
+                    className="w-full rounded-xl shadow-md"
+                  />
+                ) : (
+                  <div className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-blue/30 bg-blue-pale/40 p-2 text-center">
+                    <FloralDot />
+                    <p className="font-script text-lg text-blue-deep sm:text-2xl">
+                      Coming soon
+                    </p>
+                  </div>
+                )}
+                {caption && (
+                  <figcaption className="mx-auto mt-2 text-xs italic leading-snug text-ink/80 sm:text-base">
                     {caption}
                   </figcaption>
-                </figure>
-              );
-            })}
-          </div>
-        </LightboxGallery>
+                )}
+              </figure>
+            );
+          })}
+        </div>
+      </LightboxGallery>
 
+      <div className="relative mx-auto max-w-2xl text-center">
         <FloralDivider className="mt-16" />
         <p className="mt-8 font-script text-3xl leading-snug text-blue-deep sm:text-4xl">
           To many more beautiful moments and cherished memories
