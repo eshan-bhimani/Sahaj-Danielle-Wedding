@@ -29,24 +29,35 @@ export type WeddingPhoto = {
  *   - everything else is 1536x2048 (or equivalent ratio) and grouped
  *     straightforwardly.
  * This means row order is no longer pure chronology — some photos moved a
- * few slots from their date-accurate position to make their row match.
- * When adding new photos, group them by aspect ratio the same way, or
- * this'll look mismatched again. Real-date evidence (see prior git history
- * for the exact sources) still holds for: gameday + cliff-overlook (Jul 18,
- * 2026), savannah-fountain (Mar 21, 2026), landmark-diner (Jan 3, 2026),
- * botanical-garden (Aug 23, 2025), formal-night-silver (Feb 21, 2025),
- * fireplace-lights (May 31, 2024), brick-wall-hug (Mar 1, 2024),
- * stone-door-corsage (Jan 13, 2024), white-coat (Sep 16, 2023),
- * golden-hour-1 (Sep 8, 2023), pisa (Jul 21, 2023), spanish-steps +
- * pantheon (Jul 20, 2023), assisi (Jul 19, 2023), tuscany (Jul 18, 2023),
- * malibu-coast (May 25, 2023), graduation-2021 (2021). Everything else
- * (proposal cluster, photo-booth, dance-floor, music-festival,
- * golden-hour-2, christmas-wreath, front-door-summer) is still an
- * unverified visual-cues guess. */
+ * few slots from their date-accurate position to make their row match
+ * (e.g. tuscany sits with the proposal photos for the landscape row even
+ * though it's chronologically a 2023 photo).
+ *
+ * CORRECTION: gameday and cliff-overlook were originally dated by their
+ * Downloads-folder file mtime (both showed Jul 18, 2026), which turned out
+ * to be wrong — that was just when they were re-saved locally, not when
+ * they were taken. The real EXIF capture date embedded in the JPEG (read
+ * via `file <name>.jpg`, which prints the camera's datetime tag) says
+ * gameday is from Nov 5, 2022 and cliff-overlook from Dec 25, 2025 — both
+ * moved to their correct spots below. Lesson: trust embedded EXIF over
+ * filesystem mtime; mtime only tells you when a copy touched this disk.
+ *
+ * Real EXIF-confirmed dates: savannah-fountain (Mar 21, 2026), cliff-
+ * overlook (Dec 25, 2025), landmark-diner (Jan 3, 2026), botanical-garden
+ * (Aug 23, 2025), formal-night-silver (Feb 21, 2025), fireplace-lights
+ * (May 31, 2024), brick-wall-hug (Mar 1, 2024), stone-door-corsage (Jan
+ * 13, 2024), white-coat (Sep 16, 2023), golden-hour-1 (Sep 8, 2023), pisa
+ * (Jul 21, 2023), spanish-steps + pantheon (Jul 20, 2023), assisi (Jul 19,
+ * 2023), tuscany (Jul 18, 2023), malibu-coast (May 25, 2023), gameday
+ * (Nov 5, 2022), graduation-2021 (2021, from the stole text — no EXIF).
+ * Everything else (proposal cluster, photo-booth, dance-floor, music-
+ * festival, golden-hour-2, christmas-wreath, front-door-summer) has no
+ * EXIF datetime at all (stripped somewhere in how they were saved/shared)
+ * and is still an unverified visual-cues guess. */
 export const photos: WeddingPhoto[] = [
   { file: "/proposal.jpg", caption: "" },
-  { file: "gameday.jpg", caption: "Between the hedges." },
-  { file: "cliff-overlook.jpg", caption: "Somewhere with a view, just the two of us." },
+  { file: "proposal-ring-deck.jpg", caption: "" },
+  { file: "dance-floor.jpg", caption: "Dancing the night away." },
 
   { file: "proposal-bridge.jpg", caption: "" },
   { file: "proposal-reveal-bw.jpg", caption: "" },
@@ -56,17 +67,13 @@ export const photos: WeddingPhoto[] = [
   { file: "savannah-fountain.jpg", caption: "An afternoon in Savannah." },
   { file: "formal-night-silver.jpg", caption: "" },
 
+  { file: "cliff-overlook.jpg", caption: "Somewhere with a view, just the two of us." },
+  { file: "landmark-diner.jpg", caption: "Late-night diner runs." },
+  { file: "fireplace-lights.jpg", caption: "String lights and good company." },
+
   { file: "holiday-toast.jpg", caption: "Raising a glass together." },
   { file: "botanical-garden.jpg", caption: "" },
   { file: "graduation-2021.jpg", caption: "" },
-
-  { file: "malibu-coast.jpg", caption: "Chasing views along the California coast." },
-  { file: "photo-booth.jpg", caption: "Photo booth shenanigans." },
-  { file: "dance-floor.jpg", caption: "Dancing the night away." },
-
-  { file: "proposal-ring-deck.jpg", caption: "" },
-  { file: "landmark-diner.jpg", caption: "Late-night diner runs." },
-  { file: "fireplace-lights.jpg", caption: "String lights and good company." },
 
   { file: "brick-wall-hug.jpg", caption: "" },
   { file: "stone-door-corsage.jpg", caption: "" },
@@ -80,7 +87,11 @@ export const photos: WeddingPhoto[] = [
   { file: "pantheon.jpg", caption: "" },
   { file: "assisi.jpg", caption: "" },
 
+  { file: "malibu-coast.jpg", caption: "Chasing views along the California coast." },
+  { file: "photo-booth.jpg", caption: "Photo booth shenanigans." },
   { file: "music-festival.jpg", caption: "A day of music together." },
+
+  { file: "gameday.jpg", caption: "Between the hedges." },
   { file: "christmas-wreath.jpg", caption: "" },
   { file: "front-door-summer.jpg", caption: "Simpler days." },
   /* More memories to add:
