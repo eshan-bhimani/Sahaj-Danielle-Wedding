@@ -93,7 +93,7 @@ export default function Home() {
             5:00 PM&ndash;9:00 PM
           </p>
           <p className="mt-3 text-lg">
-            Location: 2361 Academy Ct NE Atlanta, GA 30345
+            Location: Sahaj&apos;s Childhood Home - Atlanta, GA
           </p>
           <p className="mt-4 text-lg italic text-leaf">
             Attire: Smart - Casual (Western or Pakistani)
