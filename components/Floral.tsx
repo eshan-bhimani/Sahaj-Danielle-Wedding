@@ -141,3 +141,38 @@ export function FloralDot({ className = "" }: { className?: string }) {
     </svg>
   );
 }
+
+/** A "Click Here!" label with a rose-petal arrow, pointing guests at a link. */
+export function ClickHereSticker({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`pointer-events-none select-none text-center ${className}`}
+      aria-hidden="true"
+    >
+      <p className="-rotate-3 font-script text-2xl text-magenta sm:text-3xl">
+        Click Here!
+      </p>
+      <svg
+        viewBox="0 0 80 70"
+        className="mx-auto h-14 w-16 sm:h-16 sm:w-20"
+        fill="none"
+      >
+        <path
+          d="M40 4 C 20 16, 58 30, 40 56"
+          stroke="var(--bloom-magenta)"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M40 56 L 31 47 M40 56 L 49 47"
+          stroke="var(--bloom-magenta)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <Blossom cx={22} cy={14} r={6} color="var(--bloom-pink)" center="var(--bloom-gold)" />
+        <Blossom cx={56} cy={30} r={5} color="var(--bloom-blue)" />
+      </svg>
+    </div>
+  );
+}
