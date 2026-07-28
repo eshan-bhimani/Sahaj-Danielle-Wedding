@@ -15,12 +15,18 @@ export default function RegistryPage() {
           Registry
         </h1>
         <FloralDivider className="my-10" />
-        <p className="font-script text-4xl text-magenta sm:text-5xl">
-          Link to Registry Coming Soon
-        </p>
         <p className="mt-8 text-lg leading-relaxed">
-          Your presence at our wedding is the greatest gift of all.
+          Here are some gifts we would love to start our new home together!
+          &#10084;
         </p>
+        <a
+          href="https://www.amazon.com/wedding/guest-view/M322RQKSUSH6"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-8 inline-block font-script text-4xl text-magenta transition hover:opacity-80 sm:text-5xl"
+        >
+          View Our Amazon Registry
+        </a>
       </div>
     </section>
   );
