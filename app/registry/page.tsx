@@ -25,7 +25,7 @@ export default function RegistryPage() {
           rel="noopener noreferrer"
           className="mt-8 inline-block font-script text-4xl text-magenta transition hover:opacity-80 sm:text-5xl"
         >
-          View Our Amazon Registry
+          View Our Amazon Registry Here!
         </a>
       </div>
     </section>
