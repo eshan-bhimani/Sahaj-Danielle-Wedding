@@ -138,47 +138,21 @@ function BackToSearchButton({ onClick }: { onClick: () => void }) {
 
 /* ---------- Main flow ---------- */
 
-export default function RsvpFlow({
-  initialHousehold,
-  initialCode,
-  codeNotFound = false,
-}: {
-  initialHousehold: Household | null;
-  initialCode?: string;
-  codeNotFound?: boolean;
-}) {
-  const [household, setHousehold] = useState<Household | null>(
-    initialHousehold,
-  );
-  const [answers, setAnswers] = useState<Answers>(
-    initialHousehold ? emptyAnswers(initialHousehold) : {},
-  );
+export default function RsvpFlow() {
+  const [household, setHousehold] = useState<Household | null>(null);
+  const [answers, setAnswers] = useState<Answers>({});
   const [matches, setMatches] = useState<HouseholdMatch[] | null>(null);
   const [name, setName] = useState("");
-  const [code, setCode] = useState("");
-  /* The invite code that unlocked the currently-open household — required
-   * to submit. Name search alone never sets this; picking a search match
-   * opens a code gate (below) instead of the household directly, so a
-   * stranger who searches a name can't view or RSVP for that household. */
-  const [verifiedCode, setVerifiedCode] = useState(
-    initialHousehold && initialCode ? initialCode.trim() : "",
-  );
-  const [codeGateFor, setCodeGateFor] = useState<HouseholdMatch | null>(null);
   const [allergies, setAllergies] = useState("");
   const [notes, setNotes] = useState("");
   const [email, setEmail] = useState("");
   const [updating, setUpdating] = useState(false);
-  const [error, setError] = useState<string | null>(
-    codeNotFound
-      ? "We couldn't find an invitation for that code. Try searching by name below."
-      : null,
-  );
+  const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  function openHousehold(h: Household, confirmedCode: string) {
+  function openHousehold(h: Household) {
     setHousehold(h);
-    setVerifiedCode(confirmedCode);
     setAnswers(emptyAnswers(h));
     setAllergies("");
     setNotes("");
@@ -225,50 +199,15 @@ export default function RsvpFlow({
     });
   }
 
-  function handleCode() {
-    if (!code.trim()) return;
-    setError(null);
-    startTransition(async () => {
-      const h = await loadHousehold(code);
-      if (h) openHousehold(h, code.trim());
-      else
-        setError(
-          "That invite code didn't match an invitation. Double-check it, or search by name instead.",
-        );
-    });
-  }
-
-  /* Search only ever identifies which household is yours — it can't open
-   * or submit it. Picking a match still requires the invite code, so
-   * someone who just knows a name can't view or RSVP for that family. */
   function pickMatch(match: HouseholdMatch) {
     setError(null);
-    setCode("");
-    setCodeGateFor(match);
-  }
-
-  function cancelCodeGate() {
-    setCodeGateFor(null);
-    setCode("");
-    setError(null);
-  }
-
-  function confirmCodeGate() {
-    if (!code.trim()) {
-      setError("Enter the invite code from your invitation to continue.");
-      return;
-    }
-    setError(null);
     startTransition(async () => {
-      const h = await loadHousehold(code);
-      if (h) {
-        openHousehold(h, code.trim());
-        setCodeGateFor(null);
-      } else {
+      const h = await loadHousehold(match.householdId);
+      if (h) openHousehold(h);
+      else
         setError(
-          "That invite code didn't match an invitation. Double-check it, or reach out to Danielle & Sahaj.",
+          "Something went wrong opening that invitation. Please try again.",
         );
-      }
     });
   }
 
@@ -292,7 +231,7 @@ export default function RsvpFlow({
   }
 
   function handleSubmit() {
-    if (!household || !verifiedCode) return;
+    if (!household) return;
     const events = invitedEvents(household);
     const incomplete = household.guests.some((guest) =>
       events.some(({ key }) => answers[guest.id]?.[key] == null),
@@ -306,7 +245,7 @@ export default function RsvpFlow({
     setError(null);
     startTransition(async () => {
       const result = await submitHouseholdRsvp({
-        code: verifiedCode,
+        householdId: household.householdId,
         responses: household.guests.map((guest) => ({
           guestId: guest.id,
           welcomeParty: answers[guest.id]?.welcomeParty ?? null,
@@ -318,17 +257,13 @@ export default function RsvpFlow({
         email,
       });
       if (result.ok) {
-        const fresh = await loadHousehold(verifiedCode);
+        const fresh = await loadHousehold(household.householdId);
         if (fresh) setHousehold(fresh);
         setUpdating(false);
         setSubmitted(true);
       } else if (result.error === "email") {
         setError(
           "That email address doesn't look right — fix it or leave it blank.",
-        );
-      } else if (result.error === "code") {
-        setError(
-          "Your invitation session expired — reopen it with your invite code and try again.",
         );
       } else {
         setError(
@@ -363,62 +298,6 @@ export default function RsvpFlow({
             Back to Homepage
           </Link>
         </div>
-      </div>
-    );
-  }
-
-  /* ---------- Code gate: confirm identity before opening a search match ---------- */
-  if (codeGateFor) {
-    return (
-      <div className="mx-auto max-w-xl">
-        <BackToSearchButton onClick={cancelCodeGate} />
-        <div className="rounded-2xl bg-blue-pale/60 px-6 py-8 text-center">
-          <p className="font-script text-4xl text-magenta">We found you,</p>
-          <p className="mt-2 font-serif text-3xl tracking-[0.1em] text-blue-deep uppercase">
-            {codeGateFor.householdName}
-          </p>
-          <p className="mt-4 text-lg">
-            To keep your party&apos;s responses private, enter the invite
-            code from your invitation to open it.
-          </p>
-        </div>
-        <div className="mt-8">
-          <label htmlFor="gate_code" className={headingClasses}>
-            Invite code
-          </label>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <input
-              id="gate_code"
-              type="text"
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              onKeyDown={(e) => e.key === "Enter" && confirmCodeGate()}
-              placeholder="e.g. K7M2PQ"
-              autoFocus
-              className={`${inputClasses} uppercase tracking-[0.2em]`}
-            />
-            <button
-              type="button"
-              onClick={confirmCodeGate}
-              disabled={pending}
-              className="rounded-full bg-blue px-8 py-3 font-serif text-lg tracking-[0.2em] text-white uppercase transition-colors hover:bg-blue-deep disabled:opacity-60"
-            >
-              {pending ? "…" : "Open"}
-            </button>
-          </div>
-          <p className="mt-3 text-sm text-ink/60">
-            Don&apos;t have your code handy? Reach out to Danielle &amp;
-            Sahaj.
-          </p>
-        </div>
-        {error && (
-          <p
-            role="alert"
-            className="mt-6 rounded-lg border border-poppy bg-gold-pale px-4 py-3 text-poppy"
-          >
-            {error}
-          </p>
-        )}
       </div>
     );
   }
@@ -678,33 +557,6 @@ export default function RsvpFlow({
           ))}
         </div>
       )}
-
-      <FloralDivider className="my-10" />
-
-      <div>
-        <label htmlFor="invite_code" className={headingClasses}>
-          Have an invite code?
-        </label>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            id="invite_code"
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            onKeyDown={(e) => e.key === "Enter" && handleCode()}
-            placeholder="e.g. K7M2PQ"
-            className={`${inputClasses} uppercase tracking-[0.2em]`}
-          />
-          <button
-            type="button"
-            onClick={handleCode}
-            disabled={pending}
-            className="rounded-full border-2 border-blue px-8 py-3 font-serif text-lg tracking-[0.2em] text-blue-deep uppercase transition-colors hover:bg-blue hover:text-white disabled:opacity-60"
-          >
-            {pending ? "…" : "Open"}
-          </button>
-        </div>
-      </div>
 
       {error && (
         <p

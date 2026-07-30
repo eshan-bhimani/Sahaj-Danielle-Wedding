@@ -1,7 +1,7 @@
 /*
  * End-to-end test suite for the wedding site's RSVP pipeline.
  *
- * Covers: public-API lockdown, lookup (name search + invite codes),
+ * Covers: public-API lockdown, lookup (name search + household_id),
  * submission validation and abuse cases, answer persistence, the
  * one-submission lock, page rendering, and /admin auth + CSV export.
  *
@@ -13,9 +13,9 @@
  *
  * Requires two fixture households in the database (safe to re-run —
  * the suite resets them at the start):
- *   TESTA1  "ZZTest Alpha Family"  guests: ZZAlpha One*, ZZAlpha Two,
+ *   "ZZTest Alpha Family"  guests: ZZAlpha One*, ZZAlpha Two,
  *           invited to all three events
- *   TESTB1  "ZZTest Beta Family"   guest: ZZBeta One*,
+ *   "ZZTest Beta Family"   guest: ZZBeta One*,
  *           invited to Mehndi + Wedding Day ONLY
  *
  * If SUPABASE_SERVICE_ROLE_KEY is set, fixtures are created/reset/removed
@@ -47,32 +47,39 @@ function check(name, ok, detail = "") {
   }
 }
 
+const FIXTURE_NAMES = ["ZZTest Alpha Family", "ZZTest Beta Family"];
+
 /* ---------- fixtures ---------- */
 
 async function resetFixtures() {
   if (!service) {
     console.log("(no service key — assuming fixtures exist; resetting via RPC not possible, relying on prior state)");
-    return;
+    const { data } = await sb.rpc("search_rsvp_households", { p_query: "ZZTest" });
+    const alphaId = data?.find((r) => r.household_name === "ZZTest Alpha Family")?.household_id;
+    const betaId = data?.find((r) => r.household_name === "ZZTest Beta Family")?.household_id;
+    return { alphaId, betaId };
   }
-  await service.from("households").delete().in("invite_code", ["TESTA1", "TESTB1"]);
-  const mk = async (name, code, wp, me, wd, guests) => {
+  await service.from("households").delete().in("name", FIXTURE_NAMES);
+  const mk = async (name, wp, me, wd, guests) => {
     const { data: h } = await service
       .from("households")
-      .insert({ name, invite_code: code, invited_welcome_party: wp, invited_mehndi: me, invited_wedding_day: wd })
+      .insert({ name, invited_welcome_party: wp, invited_mehndi: me, invited_wedding_day: wd })
       .select("id")
       .single();
     await service.from("guests").insert(
       guests.map((g, i) => ({ household_id: h.id, full_name: g, is_primary: i === 0, sort_order: i })),
     );
+    return h.id;
   };
-  await mk("ZZTest Alpha Family", "TESTA1", true, true, true, ["ZZAlpha One", "ZZAlpha Two"]);
-  await mk("ZZTest Beta Family", "TESTB1", false, true, true, ["ZZBeta One"]);
+  const alphaId = await mk("ZZTest Alpha Family", true, true, true, ["ZZAlpha One", "ZZAlpha Two"]);
+  const betaId = await mk("ZZTest Beta Family", false, true, true, ["ZZBeta One"]);
+  return { alphaId, betaId };
 }
 
 /* ---------- suite ---------- */
 
 console.log(`Testing against ${BASE_URL}\n`);
-await resetFixtures();
+const { alphaId, betaId } = await resetFixtures();
 
 console.log("A. Public API lockdown");
 for (const table of ["guests", "households", "rsvp_report", "rsvp_summary"]) {
@@ -97,56 +104,45 @@ console.log("\nB. Lookup");
   const { data } = await sb.rpc("search_rsvp_households", { p_query: "ZZAlpha" });
   check("search finds fixture guest", (data ?? []).some((r) => r.household_name === "ZZTest Alpha Family"));
 }
-const { data: alpha } = await sb.rpc("get_household_rsvp", { p_code: " testa1 " });
-check("code lookup tolerates case/whitespace", alpha?.found === true);
-const { data: beta } = await sb.rpc("get_household_rsvp", { p_code: "TESTB1" });
+const { data: alpha } = await sb.rpc("get_household_rsvp", { p_household_id: alphaId });
+check("household_id lookup works", alpha?.found === true);
+const { data: beta } = await sb.rpc("get_household_rsvp", { p_household_id: betaId });
 check("limited-invite household loads", beta?.found === true && !beta.invited.welcome_party);
 {
-  const { data } = await sb.rpc("get_household_rsvp", { p_code: "ZZZZ99" });
-  check("unknown code returns found:false", data?.found === false);
+  const { data } = await sb.rpc("get_household_rsvp", { p_household_id: "00000000-0000-0000-0000-000000000000" });
+  check("unknown household_id returns found:false", data?.found === false);
 }
 
 console.log("\nC. Submission validation & abuse cases");
 const [a1, a2] = alpha.guests;
 const b1 = beta.guests[0];
-const submit = (code, responses, extra = {}) =>
+const submit = (householdId, responses, extra = {}) =>
   sb.rpc("submit_household_rsvp", {
-    p_code: code,
+    p_household_id: householdId,
     p_responses: responses,
     p_food_allergies: extra.allergies ?? null,
     p_notes: extra.notes ?? null,
     p_email: extra.email ?? null,
   });
 {
-  const { data } = await submit("ZZZZ99", [
+  const { data } = await submit("00000000-0000-0000-0000-000000000000", [
     { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
   ]);
-  check("unknown code rejected", data?.error === "code");
+  check("unknown household_id rejected", data?.error === "not_found");
 }
 {
-  /* Knowing a household_id (e.g. leaked via name search) must not be
-   * enough to submit — only the invite code opens a household now. */
-  const { data } = await sb.rpc("submit_household_rsvp", {
-    p_code: alpha.household_id,
-    p_responses: [
-      { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
-    ],
-  });
-  check("household_id alone is rejected (code required)", data?.error === "code");
-}
-{
-  const { data } = await submit("TESTA1", []);
+  const { data } = await submit(alphaId, []);
   check("empty responses rejected", data?.error === "invalid");
 }
 {
-  const { data } = await submit("TESTA1", [
+  const { data } = await submit(alphaId, [
     { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
   ]);
   check("incomplete household rejected", data?.error === "incomplete");
 }
 {
   const { data } = await submit(
-    "TESTA1",
+    alphaId,
     [
       { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
       { guest_id: a2.id, welcome_party: true, mehndi: true, wedding_day: true },
@@ -157,7 +153,7 @@ const submit = (code, responses, extra = {}) =>
 }
 {
   const { data } = await submit(
-    "TESTA1",
+    alphaId,
     [
       { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
       { guest_id: a2.id, welcome_party: true, mehndi: true, wedding_day: true },
@@ -168,20 +164,20 @@ const submit = (code, responses, extra = {}) =>
 }
 {
   /* Alpha submit smuggling Beta's guest id — must not touch Beta */
-  const { data } = await submit("TESTA1", [
+  const { data } = await submit(alphaId, [
     { guest_id: a1.id, welcome_party: true, mehndi: true, wedding_day: true },
     { guest_id: a2.id, welcome_party: false, mehndi: true, wedding_day: false },
     { guest_id: b1.id, welcome_party: true, mehndi: true, wedding_day: true },
   ], { allergies: "peanuts", notes: "suite note", email: "suite@test.com" });
   check("submit succeeds ignoring foreign guest id", data?.ok === true);
-  const { data: betaAfter } = await sb.rpc("get_household_rsvp", { p_code: "TESTB1" });
+  const { data: betaAfter } = await sb.rpc("get_household_rsvp", { p_household_id: betaId });
   check(
     "cross-household injection had no effect",
     betaAfter.guests[0].mehndi === null && betaAfter.guests[0].wedding_day === null,
   );
 }
 {
-  const { data: after } = await sb.rpc("get_household_rsvp", { p_code: "TESTA1" });
+  const { data: after } = await sb.rpc("get_household_rsvp", { p_household_id: alphaId });
   const g1 = after.guests.find((g) => g.name === "ZZAlpha One");
   const g2 = after.guests.find((g) => g.name === "ZZAlpha Two");
   check(
@@ -194,12 +190,12 @@ const submit = (code, responses, extra = {}) =>
 }
 {
   /* Reversal (July 16, 2026): resubmission overwrites, it doesn't lock. */
-  const { data } = await submit("TESTA1", [
+  const { data } = await submit(alphaId, [
     { guest_id: a1.id, welcome_party: false, mehndi: false, wedding_day: false },
     { guest_id: a2.id, welcome_party: false, mehndi: false, wedding_day: false },
   ]);
   check("resubmission overwrites instead of locking", data?.ok === true);
-  const { data: after } = await sb.rpc("get_household_rsvp", { p_code: "TESTA1" });
+  const { data: after } = await sb.rpc("get_household_rsvp", { p_household_id: alphaId });
   check(
     "overwritten answers reflect the second submission",
     after.guests.every((g) => g.welcome_party === false),
@@ -207,11 +203,11 @@ const submit = (code, responses, extra = {}) =>
 }
 {
   /* Beta invited to Mehndi + Wedding only — welcome answer must be discarded */
-  const { data } = await submit("TESTB1", [
+  const { data } = await submit(betaId, [
     { guest_id: b1.id, welcome_party: true, mehndi: true, wedding_day: false },
   ]);
   check("limited-invite submit succeeds", data?.ok === true);
-  const { data: after } = await sb.rpc("get_household_rsvp", { p_code: "TESTB1" });
+  const { data: after } = await sb.rpc("get_household_rsvp", { p_household_id: betaId });
   check(
     "answer for uninvited event discarded",
     after.guests[0].welcome_party === null && after.guests[0].mehndi === true,
@@ -226,14 +222,6 @@ const get = async (path, headers = {}) => {
 for (const p of ["/", "/dress-code", "/faqs", "/registry", "/rsvp", "/admin"]) {
   const { status } = await get(p);
   check(`${p} serves 200`, status === 200);
-}
-{
-  const { body } = await get("/rsvp?code=TESTA1");
-  check("code link renders household", body.includes("ZZTest Alpha Family"));
-}
-{
-  const { body } = await get("/rsvp?code=ZZZZ99");
-  check("bad code link shows friendly error", body.includes("find an invitation"));
 }
 const password = process.env.ADMIN_PASSWORD;
 const key = process.env.ADMIN_REPORT_KEY;
@@ -254,10 +242,10 @@ if (password && key) {
 
 /* ---------- teardown ---------- */
 if (service) {
-  await service.from("households").delete().in("invite_code", ["TESTA1", "TESTB1"]);
+  await service.from("households").delete().in("name", FIXTURE_NAMES);
   console.log("\nFixtures removed.");
 } else {
-  console.log("\nNote: fixtures TESTA1/TESTB1 left in place (no service key to remove them).");
+  console.log("\nNote: fixtures ZZTest Alpha/Beta Family left in place (no service key to remove them).");
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

@@ -153,17 +153,16 @@ export default async function AdminPage({
                 <th className="px-4 py-3">Note</th>
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Phone</th>
-                <th className="px-4 py-3">Code</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row, i) => {
                 const firstOfHousehold =
                   i === 0 ||
-                  rows[i - 1].invite_code !== row.invite_code;
+                  rows[i - 1].household_id !== row.household_id;
                 return (
                   <tr
-                    key={`${row.invite_code}-${row.guest}`}
+                    key={`${row.household_id}-${row.guest}`}
                     className={`border-t ${
                       firstOfHousehold
                         ? "border-blue-pale"
@@ -195,9 +194,6 @@ export default async function AdminPage({
                     </td>
                     <td className="px-4 py-2.5">
                       {firstOfHousehold ? (row.phone ?? "") : ""}
-                    </td>
-                    <td className="px-4 py-2.5 font-mono text-xs">
-                      {firstOfHousehold ? row.invite_code : ""}
                     </td>
                   </tr>
                 );

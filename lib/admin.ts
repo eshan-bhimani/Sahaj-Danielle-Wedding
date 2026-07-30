@@ -38,7 +38,7 @@ export type ReportRow = {
   food_allergies: string | null;
   notes: string | null;
   responded_at: string | null;
-  invite_code: string;
+  household_id: string;
   email: string | null;
   phone: string | null;
 };

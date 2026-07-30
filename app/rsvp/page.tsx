@@ -1,20 +1,12 @@
 import type { Metadata } from "next";
 import RsvpFlow from "@/components/RsvpFlow";
 import { FloralCorner, FloralDivider } from "@/components/Floral";
-import { loadHousehold } from "./actions";
 
 export const metadata: Metadata = {
   title: "RSVP — Danielle & Sahaj",
 };
 
-export default async function RsvpPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ code?: string }>;
-}) {
-  const { code } = await searchParams;
-  const initialHousehold = code ? await loadHousehold(code) : null;
-
+export default function RsvpPage() {
   return (
     <section className="relative overflow-hidden px-4 py-16 sm:py-20">
       <FloralCorner className="left-0 top-0 -translate-x-6 -translate-y-6" />
@@ -33,11 +25,7 @@ export default async function RsvpPage({
           you&apos;ll be able to RSVP for your entire group.
         </p>
       </div>
-      <RsvpFlow
-        initialHousehold={initialHousehold}
-        initialCode={code}
-        codeNotFound={Boolean(code) && !initialHousehold}
-      />
+      <RsvpFlow />
     </section>
   );
 }
