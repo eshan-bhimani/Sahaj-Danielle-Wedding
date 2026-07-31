@@ -116,7 +116,7 @@ function RsvpRecap({ household }: { household: Household }) {
       ))}
       {household.foodAllergies && (
         <p className="border-t border-blue-pale pt-5 text-lg">
-          <span className="font-medium">Food allergies:</span>{" "}
+          <span className="font-medium">Dietary restrictions:</span>{" "}
           {household.foodAllergies}
         </p>
       )}
@@ -451,7 +451,7 @@ export default function RsvpFlow() {
           </div>
           <div>
             <label htmlFor="food_allergies" className={headingClasses}>
-              Food Allergies
+              Dietary Restrictions
             </label>
             <input
               id="food_allergies"
@@ -459,7 +459,7 @@ export default function RsvpFlow() {
               maxLength={1000}
               value={allergies}
               onChange={(e) => setAllergies(e.target.value)}
-              placeholder="Let us know about any food allergies in your party"
+              placeholder="Let us know about any dietary restrictions in your party"
               className={inputClasses}
             />
             <p className="mt-1.5 text-sm text-ink/60">Leave blank if none.</p>

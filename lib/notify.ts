@@ -46,7 +46,7 @@ export function confirmationText(household: Household): string {
     lines.push("");
   }
   if (household.foodAllergies) {
-    lines.push(`Food allergies: ${household.foodAllergies}`, "");
+    lines.push(`Dietary restrictions: ${household.foodAllergies}`, "");
   }
   lines.push(
     "Plans change? You can update your RSVP anytime on our website.",
@@ -89,7 +89,7 @@ export function confirmationHtml(household: Household): string {
     </p>
     <hr style="border:none;border-top:1px solid #e3edf9;margin:20px 0" />
     ${guestBlocks}
-    ${household.foodAllergies ? `<p style="margin-top:18px"><b>Food allergies:</b> ${esc(household.foodAllergies)}</p>` : ""}
+    ${household.foodAllergies ? `<p style="margin-top:18px"><b>Dietary restrictions:</b> ${esc(household.foodAllergies)}</p>` : ""}
     <hr style="border:none;border-top:1px solid #e3edf9;margin:20px 0" />
     <p style="color:#777;font-size:14px">
       Plans change? You can update your RSVP anytime on our website.

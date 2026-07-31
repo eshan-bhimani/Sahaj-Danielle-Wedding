@@ -15,7 +15,7 @@ export async function GET() {
   }
 
   const header =
-    "household,guest,welcome_party,mehndi,wedding_day,food_allergies,notes,email,phone,responded_at";
+    "household,guest,welcome_party,mehndi,wedding_day,dietary_restrictions,notes,email,phone,responded_at";
   const lines = report.rows.map((r) =>
     [
       csvField(r.household),

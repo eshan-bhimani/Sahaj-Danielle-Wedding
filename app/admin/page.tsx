@@ -98,6 +98,7 @@ export default async function AdminPage({
     );
   }
   const { summary, rows } = report;
+  const weddingDayNo = rows.filter((r) => r.wedding_day === "no").length;
 
   return (
     <section className="px-4 py-12">
@@ -114,7 +115,7 @@ export default async function AdminPage({
           </a>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-5">
           <StatTile
             label="Households in"
             value={`${summary.households_responded}/${summary.households_total}`}
@@ -134,10 +135,16 @@ export default async function AdminPage({
             value={`${summary.wedding_day_yes}`}
             className="bg-pink-pale text-magenta"
           />
+          <StatTile
+            label="Wedding Day — No"
+            value={`${weddingDayNo}`}
+            className="bg-poppy/10 text-poppy"
+          />
         </div>
         <p className="mt-2 text-sm text-ink/60">
-          Event tiles show confirmed &ldquo;yes&rdquo; guest counts. Updates
-          live — refresh anytime.
+          &ldquo;Yes&rdquo; tiles show confirmed guest counts; the
+          &ldquo;Wedding Day — No&rdquo; tile counts guests who declined May
+          22nd specifically. Updates live — refresh anytime.
         </p>
 
         <div className="mt-8 overflow-x-auto rounded-xl border border-blue-pale">
@@ -149,7 +156,7 @@ export default async function AdminPage({
                 <th className="px-4 py-3">Welcome Party</th>
                 <th className="px-4 py-3">Mehndi</th>
                 <th className="px-4 py-3">Wedding Day</th>
-                <th className="px-4 py-3">Allergies</th>
+                <th className="px-4 py-3">Dietary Restrictions</th>
                 <th className="px-4 py-3">Note</th>
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Phone</th>
@@ -202,8 +209,8 @@ export default async function AdminPage({
           </table>
         </div>
         <p className="mt-3 text-sm text-ink/60">
-          Households that haven&apos;t responded yet are shaded. Allergies,
-          notes, and email are per household.
+          Households that haven&apos;t responded yet are shaded. Dietary
+          restrictions, notes, and email are per household.
         </p>
       </div>
     </section>
