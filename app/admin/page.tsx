@@ -158,7 +158,7 @@ export default async function AdminPage({
                 <th className="px-4 py-3">Wedding Day</th>
                 <th className="px-4 py-3">Dietary Restrictions</th>
                 <th className="px-4 py-3">Note</th>
-                <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Email (confirmation sent later)</th>
                 <th className="px-4 py-3">Phone</th>
               </tr>
             </thead>

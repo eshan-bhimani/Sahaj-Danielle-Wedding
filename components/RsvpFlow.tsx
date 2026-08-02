@@ -434,7 +434,7 @@ export default function RsvpFlow() {
         <div className="mt-8 space-y-6">
           <div>
             <label htmlFor="confirmation_email" className={headingClasses}>
-              Email
+              Email (confirmation sent later)
             </label>
             <input
               id="confirmation_email"
