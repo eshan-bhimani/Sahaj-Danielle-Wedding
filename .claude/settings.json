@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__claude_ai_Supabase__(execute_sql|apply_migration)",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 60,
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" || exit 0; [ -f .env.local ] || exit 0; node --env-file=.env.local scripts/export-guests.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}
