@@ -9,7 +9,7 @@ const faqs = [
   {
     question: "Is there lodging?",
     answer:
-      "While we are not reserving blocks of rooms for guests, there are an abundance of hotels close to the venue for guests to stay at. We recommend looking at Avalon in Alpharetta, GA for a mix of shopping and restaurants that is still close to the venue.",
+      "We are currently working to secure a block of hotel rooms for our guests and will share the details here as soon as they are finalized. In the meantime, there are an abundance of hotels close to the venue. We recommend looking at Avalon in Alpharetta, GA for a mix of shopping and restaurants that is still close to the venue.",
   },
   {
     question: "Can I bring people who were not invited?",
