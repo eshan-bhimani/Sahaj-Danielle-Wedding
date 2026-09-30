@@ -10,6 +10,9 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+/* Venue cap for May 22nd — the number the "Max possible" tile checks against. */
+const WEDDING_DAY_CAP = 165;
+
 const answerClasses: Record<string, string> = {
   YES: "font-semibold text-leaf",
   no: "text-ink/50",
@@ -98,7 +101,16 @@ export default async function AdminPage({
     );
   }
   const { summary, rows } = report;
-  const weddingDayNo = rows.filter((r) => r.wedding_day === "no").length;
+  const weddingDayRows = rows.filter(
+    (r) => r.wedding_day !== "— not invited",
+  );
+  const weddingDayInvited = weddingDayRows.length;
+  const weddingDayNo = weddingDayRows.filter(
+    (r) => r.wedding_day === "no",
+  ).length;
+  const weddingDayCeiling = weddingDayInvited - weddingDayNo;
+  const weddingDayHeadroom = WEDDING_DAY_CAP - weddingDayCeiling;
+  const underCap = weddingDayCeiling <= WEDDING_DAY_CAP;
 
   return (
     <section className="px-4 py-12">
@@ -115,7 +127,7 @@ export default async function AdminPage({
           </a>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <StatTile
             label="Households in"
             value={`${summary.households_responded}/${summary.households_total}`}
@@ -137,14 +149,29 @@ export default async function AdminPage({
           />
           <StatTile
             label="Wedding Day — No"
-            value={`${weddingDayNo}`}
+            value={`${weddingDayNo}/${weddingDayInvited}`}
             className="bg-poppy/10 text-poppy"
+          />
+          <StatTile
+            label={underCap ? "Max possible — under" : "Max possible — OVER"}
+            value={`${weddingDayCeiling}/${WEDDING_DAY_CAP}`}
+            className={
+              underCap ? "bg-leaf/15 text-leaf" : "bg-poppy/20 text-poppy"
+            }
           />
         </div>
         <p className="mt-2 text-sm text-ink/60">
-          &ldquo;Yes&rdquo; tiles show confirmed guest counts; the
-          &ldquo;Wedding Day — No&rdquo; tile counts guests who declined May
-          22nd specifically. Updates live — refresh anytime.
+          &ldquo;Yes&rdquo; tiles show confirmed guest counts.
+          &ldquo;Wedding Day — No&rdquo; is guests who declined May 22nd out of
+          everyone invited to it. &ldquo;Max possible&rdquo; is invited minus
+          those nos — the headcount if every household still outstanding says
+          yes to everything — measured against the {WEDDING_DAY_CAP} cap, so{" "}
+          <strong className="font-semibold">
+            {underCap
+              ? `${weddingDayHeadroom} seat${weddingDayHeadroom === 1 ? "" : "s"} of room left`
+              : `${-weddingDayHeadroom} over the cap`}
+          </strong>{" "}
+          in the worst case. Updates live — refresh anytime.
         </p>
 
         <div className="mt-8 overflow-x-auto rounded-xl border border-blue-pale">
